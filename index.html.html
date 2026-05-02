@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ALT.GRG Rentals — Book a Ride</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#D4A825;--gold-l:#E8C547;--gold-d:#A8831A;
+  --black:#0A0A0A;--dark:#111111;--dark2:#181818;--dark3:#222222;
+  --white:#F5F3EE;--wm:rgba(245,243,238,0.6);--wf:rgba(245,243,238,0.1);
+  --font-d:'Cormorant Garamond',serif;--font-b:'Barlow',sans-serif;
+  --radius:4px;
+}
+html{scroll-behavior:smooth}
+body{background:var(--black);color:var(--white);font-family:var(--font-b);font-weight:300;line-height:1.6;min-height:100vh}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;justify-content:space-between;align-items:center;padding:1rem 5%;background:rgba(10,10,10,0.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--wf)}
+.nav-logo{height:36px}
+.nav-tabs{display:flex;gap:0;border:1px solid var(--wf);border-radius:var(--radius)}
+.tab-btn{background:transparent;border:none;color:var(--wm);font-family:var(--font-b);font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;font-weight:500;padding:0.5rem 1.2rem;cursor:pointer;transition:all 0.2s}
+.tab-btn.active{background:var(--gold);color:var(--black)}
+.tab-btn:first-child{border-radius:var(--radius) 0 0 var(--radius)}
+.tab-btn:last-child{border-radius:0 var(--radius) var(--radius) 0}
+
+/* PAGE SECTIONS */
+.page{display:none;padding-top:70px;min-height:100vh}
+.page.active{display:block}
+
+/* ── BOOKING PAGE ── */
+.booking-hero{padding:3.5rem 6% 2rem;border-bottom:1px solid var(--wf)}
+.eyebrow{font-size:0.65rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);font-weight:500;display:flex;align-items:center;gap:0.6rem;margin-bottom:0.8rem}
+.eyebrow::before{content:'';width:24px;height:1px;background:var(--gold);display:inline-block}
+.booking-hero h1{font-family:var(--font-d);font-size:clamp(2rem,4vw,3rem);font-weight:300;line-height:1.1}
+.booking-hero h1 em{font-style:italic;color:var(--gold-l)}
+
+.booking-layout{display:grid;grid-template-columns:1fr 360px;gap:0;min-height:calc(100vh - 200px)}
+
+/* FORM SIDE */
+.form-side{padding:2.5rem 5%;border-right:1px solid var(--wf)}
+
+.step{display:none}
+.step.active{display:block}
+
+.step-header{display:flex;align-items:center;gap:1rem;margin-bottom:2rem}
+.step-num{width:32px;height:32px;border:1px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.75rem;color:var(--gold);font-weight:500;flex-shrink:0}
+.step-header h2{font-family:var(--font-d);font-size:1.5rem;font-weight:400}
+
+/* Vehicle Cards */
+.vehicle-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem}
+.vehicle-card{border:1px solid var(--wf);padding:1.8rem 1rem;cursor:pointer;transition:all 0.25s;position:relative;text-align:center}
+.vehicle-card:hover{border-color:var(--gold-d)}
+.vehicle-card.selected{border-color:var(--gold);background:rgba(212,168,37,0.06)}
+.vehicle-card.selected::after{content:'✓';position:absolute;top:8px;right:10px;color:var(--gold);font-size:0.75rem;font-weight:600}
+.vehicle-tier{font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:0.3rem}
+.vehicle-name{font-family:var(--font-d);font-size:1.5rem;font-weight:400;letter-spacing:0.02em}
+.vehicle-eg{font-size:0.72rem;color:var(--wm)}
+.popular-badge{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--gold);color:var(--black);font-size:0.55rem;letter-spacing:0.15em;text-transform:uppercase;font-weight:700;padding:2px 8px;white-space:nowrap}
+
+/* Service Cards */
+.service-section{margin-bottom:2rem}
+.service-section-title{font-size:0.62rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--wm);font-weight:500;margin-bottom:0.8rem;padding-bottom:0.5rem;border-bottom:1px solid var(--wf)}
+.service-list{display:flex;flex-direction:column;gap:0.5rem}
+.service-item{display:flex;align-items:center;justify-content:space-between;padding:0.9rem 1.1rem;border:1px solid var(--wf);cursor:pointer;transition:all 0.2s;gap:1rem}
+.service-item:hover{border-color:var(--gold-d)}
+.service-item.selected{border-color:var(--gold);background:rgba(212,168,37,0.06)}
+.service-item.disabled{opacity:0.3;cursor:not-allowed;pointer-events:none}
+.service-item-left{display:flex;align-items:center;gap:0.8rem;flex:1}
+.service-check{width:18px;height:18px;border:1px solid var(--wm);border-radius:2px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.65rem;transition:all 0.2s}
+.service-item.selected .service-check{background:var(--gold);border-color:var(--gold);color:var(--black)}
+.service-item.selected .service-check::after{content:'✓';color:var(--black);font-weight:600}
+.service-item.core-selected .service-check{background:var(--gold);border-color:var(--gold);color:var(--black)}
+.service-item.core-selected .service-check::after{content:'✓';color:var(--black);font-weight:600}
+.service-info h4{font-size:0.88rem;font-weight:500;margin-bottom:0.1rem}
+.service-info p{font-size:0.72rem;color:var(--wm)}
+.service-price{font-size:0.82rem;font-weight:500;color:var(--gold);text-align:right;white-space:nowrap}
+
+/* Hour selector */
+.hour-input{display:none;align-items:center;gap:0.5rem;margin-top:0.5rem;padding:0 1.1rem 0.8rem}
+.hour-input.show{display:flex}
+.hour-input label{font-size:0.7rem;color:var(--wm);letter-spacing:0.1em;text-transform:uppercase;white-space:nowrap}
+.hour-input input{background:var(--dark3);border:1px solid var(--wf);color:var(--white);font-family:var(--font-b);font-size:0.85rem;padding:0.3rem 0.6rem;width:70px;outline:none}
+.hour-input input:focus{border-color:var(--gold)}
+
+/* Form fields */
+.fields-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem}
+.field{display:flex;flex-direction:column;gap:0.35rem}
+.field.full{grid-column:1/-1}
+.field label{font-size:0.62rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--wm);font-weight:500}
+.field input,.field select,.field textarea{background:var(--dark2);border:1px solid var(--wf);color:var(--white);font-family:var(--font-b);font-size:0.88rem;font-weight:300;padding:0.75rem 0.9rem;outline:none;transition:border-color 0.2s;-webkit-appearance:none;width:100%}
+.field input::placeholder,.field textarea::placeholder{color:rgba(245,243,238,0.25)}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold)}
+.field select option{background:var(--dark2)}
+.field textarea{resize:vertical;min-height:80px}
+
+/* Referral source */
+.radio-group{display:flex;flex-wrap:wrap;gap:0.5rem}
+.radio-opt{display:flex;align-items:center;gap:0.4rem;padding:0.4rem 0.8rem;border:1px solid var(--wf);cursor:pointer;font-size:0.75rem;color:var(--wm);transition:all 0.2s}
+.radio-opt input{display:none}
+.radio-opt.selected{border-color:var(--gold);color:var(--gold)}
+
+/* Step nav */
+.step-nav{display:flex;justify-content:space-between;align-items:center;margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--wf)}
+.btn-back{background:transparent;border:1px solid var(--wf);color:var(--wm);font-family:var(--font-b);font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;font-weight:500;padding:0.7rem 1.5rem;cursor:pointer;transition:all 0.2s}
+.btn-back:hover{border-color:var(--wm);color:var(--white)}
+.btn-next{background:var(--gold);border:none;color:var(--black);font-family:var(--font-b);font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;font-weight:600;padding:0.7rem 2rem;cursor:pointer;transition:all 0.2s}
+.btn-next:hover{background:var(--gold-l)}
+.btn-next:disabled{opacity:0.4;cursor:not-allowed}
+
+/* SUMMARY SIDE */
+.summary-side{padding:2.5rem 2rem;background:var(--dark);position:sticky;top:70px;height:calc(100vh - 70px);overflow-y:auto}
+.summary-side h3{font-family:var(--font-d);font-size:1.2rem;font-weight:400;margin-bottom:1.5rem;padding-bottom:0.8rem;border-bottom:1px solid var(--wf)}
+.summary-empty{font-size:0.82rem;color:rgba(245,243,238,0.3);font-style:italic}
+.summary-vehicle{margin-bottom:1.2rem;padding-bottom:1.2rem;border-bottom:1px solid var(--wf)}
+.summary-vehicle .tier{font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:0.2rem}
+.summary-vehicle .name{font-size:1rem;font-weight:500}
+.summary-services{margin-bottom:1.5rem}
+.summary-row{display:flex;justify-content:space-between;align-items:flex-start;padding:0.5rem 0;font-size:0.82rem;gap:0.5rem}
+.summary-row .label{color:var(--wm);flex:1}
+.summary-row .val{font-weight:500;text-align:right}
+.summary-row.addon .label{color:rgba(245,243,238,0.45);font-size:0.75rem}
+.summary-row.addon .val{color:rgba(245,243,238,0.45);font-size:0.75rem}
+.summary-total{border-top:1px solid var(--wf);padding-top:1rem;margin-top:0.5rem}
+.summary-total .label{color:var(--white);font-weight:500;font-size:0.85rem}
+.summary-total .val{color:var(--gold);font-family:var(--font-d);font-size:1.4rem;font-weight:400}
+.note-box{background:rgba(212,168,37,0.08);border:1px solid rgba(212,168,37,0.2);padding:0.8rem 1rem;font-size:0.72rem;color:var(--wm);line-height:1.6;margin-top:1.5rem}
+.note-box strong{color:var(--gold);font-weight:500}
+
+/* Progress dots */
+.progress{display:flex;gap:0.5rem;align-items:center;margin-bottom:2rem}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--wf);border:1px solid var(--wf);transition:all 0.3s}
+.dot.active{background:var(--gold);border-color:var(--gold)}
+.dot.done{background:var(--gold-d);border-color:var(--gold-d)}
+.progress-label{font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--wm);margin-left:0.5rem}
+
+/* Success */
+.success-page{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:3rem 5%}
+.success-icon{width:64px;height:64px;border:2px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:1.5rem;color:var(--gold)}
+.success-page h2{font-family:var(--font-d);font-size:2rem;font-weight:300;margin-bottom:0.8rem}
+.success-page p{color:var(--wm);font-size:0.9rem;max-width:420px;margin-bottom:2rem}
+.booking-ref{background:var(--dark2);border:1px solid var(--wf);padding:0.7rem 1.5rem;font-size:0.8rem;color:var(--gold);letter-spacing:0.15em;margin-bottom:2rem}
+
+/* ── ADMIN PAGE ── */
+.admin-page{padding:2rem 4%}
+.admin-header{margin-bottom:2rem}
+.admin-header h1{font-family:var(--font-d);font-size:2rem;font-weight:300;margin-bottom:0.3rem}
+.admin-header p{font-size:0.82rem;color:var(--wm)}
+.sheets-setup{background:var(--dark2);border:1px solid rgba(212,168,37,0.3);padding:1.5rem;margin-bottom:2rem;max-width:600px}
+.sheets-setup h3{font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:1rem}
+.sheets-setup p{font-size:0.82rem;color:var(--wm);line-height:1.7;margin-bottom:0.8rem}
+.sheets-url-row{display:flex;gap:0.5rem;margin-top:0.8rem}
+.sheets-url-row input{flex:1;background:var(--dark3);border:1px solid var(--wf);color:var(--white);font-family:var(--font-b);font-size:0.82rem;padding:0.6rem 0.8rem;outline:none}
+.sheets-url-row input:focus{border-color:var(--gold)}
+.btn-sm{background:var(--gold);border:none;color:var(--black);font-family:var(--font-b);font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;font-weight:600;padding:0.6rem 1rem;cursor:pointer;white-space:nowrap}
+
+/* Stats */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem}
+.stat-card{background:var(--dark2);border:1px solid var(--wf);padding:1.2rem 1.4rem}
+.stat-card .s-label{font-size:0.6rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--wm);margin-bottom:0.4rem}
+.stat-card .s-val{font-family:var(--font-d);font-size:2rem;font-weight:300;color:var(--gold)}
+.stat-card .s-sub{font-size:0.72rem;color:rgba(245,243,238,0.35);margin-top:0.2rem}
+
+/* Charts row */
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:2rem}
+.chart-card{background:var(--dark2);border:1px solid var(--wf);padding:1.4rem}
+.chart-card h4{font-size:0.65rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--wm);margin-bottom:1.2rem}
+.bar-chart{display:flex;flex-direction:column;gap:0.6rem}
+.bar-row{display:flex;align-items:center;gap:0.7rem;font-size:0.72rem}
+.bar-label{width:110px;color:var(--wm);flex-shrink:0;font-size:0.68rem}
+.bar-track{flex:1;height:8px;background:var(--wf);border-radius:2px;overflow:hidden}
+.bar-fill{height:100%;background:var(--gold);border-radius:2px;transition:width 0.8s ease}
+.bar-val{width:55px;text-align:right;font-weight:500;color:var(--white)}
+
+/* Bookings table */
+.table-card{background:var(--dark2);border:1px solid var(--wf);margin-bottom:2rem;overflow:hidden}
+.table-card h4{font-size:0.65rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--wm);padding:1rem 1.4rem;border-bottom:1px solid var(--wf);display:flex;justify-content:space-between;align-items:center}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:0.78rem}
+thead th{padding:0.7rem 1rem;text-align:left;font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--wm);font-weight:500;border-bottom:1px solid var(--wf);white-space:nowrap}
+tbody tr{border-bottom:1px solid rgba(245,243,238,0.05)}
+tbody tr:hover{background:rgba(212,168,37,0.04)}
+tbody td{padding:0.75rem 1rem;color:var(--white);white-space:nowrap}
+.badge{display:inline-block;padding:2px 8px;font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;font-weight:600;border-radius:2px}
+.badge-eco{background:rgba(100,180,100,0.15);color:#7dba7d}
+.badge-prem{background:rgba(212,168,37,0.15);color:var(--gold)}
+.badge-lux{background:rgba(160,120,220,0.15);color:#c09eeb}
+.filter-row{display:flex;gap:0.5rem;padding:0.8rem 1.4rem;border-bottom:1px solid var(--wf);flex-wrap:wrap}
+.filter-btn{background:transparent;border:1px solid var(--wf);color:var(--wm);font-family:var(--font-b);font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;padding:0.3rem 0.8rem;cursor:pointer;transition:all 0.2s}
+.filter-btn.active,.filter-btn:hover{border-color:var(--gold);color:var(--gold)}
+.export-btn{background:transparent;border:1px solid var(--wf);color:var(--wm);font-family:var(--font-b);font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;padding:0.3rem 0.8rem;cursor:pointer;transition:all 0.2s}
+.export-btn:hover{border-color:var(--gold);color:var(--gold)}
+
+/* Toast */
+.toast{position:fixed;bottom:2rem;right:2rem;background:var(--dark2);border:1px solid var(--gold);color:var(--white);padding:0.9rem 1.5rem;font-size:0.82rem;z-index:999;transform:translateY(100px);opacity:0;transition:all 0.35s;max-width:320px}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.error{border-color:#e24b4a;color:#f09595}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <img class="nav-logo" src="data:image/jpeg;base64,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" alt="ALT GRG"/>
+  <div class="nav-tabs">
+    <button class="tab-btn active" onclick="showPage('booking')">Book a Ride</button>
+    <button class="tab-btn" onclick="showPage('admin')">Admin Dashboard</button>
+  </div>
+</nav>
+
+<!-- ══════════ BOOKING PAGE ══════════ -->
+<div id="page-booking" class="page active">
+  <div class="booking-hero">
+    <div class="eyebrow">Premium Chauffeur Service</div>
+    <h1>Reserve Your <em>Journey</em></h1>
+  </div>
+
+  <div class="booking-layout">
+    <!-- FORM -->
+    <div class="form-side">
+      <div class="progress">
+        <div class="dot active" id="dot-1"></div>
+        <div class="dot" id="dot-2"></div>
+        <div class="dot" id="dot-3"></div>
+        <span class="progress-label" id="progress-label">Select Vehicle & Service</span>
+      </div>
+
+      <!-- STEP 1: Vehicle + Service -->
+      <div class="step active" id="step-1">
+        <div class="step-header">
+          <div class="step-num">1</div>
+          <h2>Choose Your Vehicle &amp; Service</h2>
+        </div>
+
+        <!-- VEHICLE SELECT -->
+        <p style="font-size:0.75rem;color:var(--wm);margin-bottom:1rem;letter-spacing:0.05em">Select vehicle class</p>
+        <div class="vehicle-grid" id="vehicle-grid">
+          <div class="vehicle-card" data-vehicle="economy" onclick="selectVehicle(this)">
+            <div class="vehicle-name">Economy</div>
+          </div>
+          <div class="vehicle-card" data-vehicle="premium" onclick="selectVehicle(this)">
+            <div class="popular-badge">Most Popular</div>
+            <div class="vehicle-name">Premium</div>
+          </div>
+          <div class="vehicle-card" data-vehicle="luxury" onclick="selectVehicle(this)">
+            <div class="vehicle-name">Luxury</div>
+          </div>
+        </div>
+
+        <!-- SERVICE SELECT -->
+        <p style="font-size:0.75rem;color:var(--wm);margin-bottom:1rem;margin-top:1.5rem;letter-spacing:0.05em">Select your core service</p>
+        <div class="service-list" id="core-services">
+          <div class="service-item" data-service="half_day" data-type="core" onclick="selectCore(this)">
+            <div class="service-item-left">
+              <div class="service-check"></div>
+              <div class="service-info"><h4>Half Day Rental</h4><p>6 hours</p></div>
+            </div>
+            <div class="service-price" id="price-half_day">—</div>
+          </div>
+          <div class="service-item" data-service="full_day" data-type="core" onclick="selectCore(this)">
+            <div class="service-item-left">
+              <div class="service-check"></div>
+              <div class="service-info"><h4>Full Day Rental</h4><p>8am – 6pm</p></div>
+            </div>
+            <div class="service-price" id="price-full_day">—</div>
+          </div>
+          <div class="service-item" data-service="airport" data-type="core" onclick="selectCore(this)">
+            <div class="service-item-left">
+              <div class="service-check"></div>
+              <div class="service-info"><h4>Airport Pickup / Drop-off</h4><p>Per trip</p></div>
+            </div>
+            <div class="service-price" id="price-airport">—</div>
+          </div>
+          <div class="service-item" data-service="interstate" data-type="core" onclick="selectCore(this)">
+            <div class="service-item-left">
+              <div class="service-check"></div>
+              <div class="service-info"><h4>Interstate Travel</h4><p>Daily — Premium &amp; Luxury only</p></div>
+            </div>
+            <div class="service-price" id="price-interstate">—</div>
+          </div>
+          <div class="service-item" data-service="special_events" data-type="core" onclick="selectCore(this)">
+            <div class="service-item-left">
+              <div class="service-check"></div>
+              <div class="service-info"><h4>Special Events</h4><p>Weddings etc. · Per event</p></div>
+            </div>
+            <div class="service-price" id="price-special_events">—</div>
+          </div>
+        </div>
+
+        <p style="font-size:0.75rem;color:var(--wm);margin-bottom:1rem;margin-top:1.8rem;letter-spacing:0.05em">Add-ons <span style="color:rgba(245,243,238,0.35)">(optional, stackable on core service)</span></p>
+        <div class="service-list" id="addon-services">
+          <div class="service-item" data-service="evening_ext" data-type="addon" onclick="toggleAddon(this)">
+            <div class="service-item-left">
+              <div class="service-check"></div>
+              <div class="service-info"><h4>Evening Extension</h4><p>6pm – 10pm · per hour</p></div>
+            </div>
+            <div class="service-price" id="price-evening_ext">—</div>
+          </div>
+          <div class="hour-input" id="hours-evening_ext">
+            <label>Hours:</label>
+            <input type="number" min="1" max="4" value="1" id="val-evening_ext" oninput="updateAddonHours('evening_ext')" />
+            <span style="font-size:0.72rem;color:var(--wm)">hr(s)</span>
+          </div>
+          <div class="service-item" data-service="night_shift" data-type="addon" onclick="toggleAddon(this)">
+            <div class="service-item-left">
+              <div class="service-check"></div>
+              <div class="service-info"><h4>Night Shift</h4><p>10pm – 5:59am · 2hr min · per hour</p></div>
+            </div>
+            <div class="service-price" id="price-night_shift">—</div>
+          </div>
+          <div class="hour-input" id="hours-night_shift">
+            <label>Hours:</label>
+            <input type="number" min="2" max="8" value="2" id="val-night_shift" oninput="updateAddonHours('night_shift')" />
+            <span style="font-size:0.72rem;color:var(--wm)">hr(s)</span>
+          </div>
+        </div>
+
+        <div class="step-nav">
+          <span></span>
+          <button class="btn-next" id="btn-next-1" onclick="goStep(2)" disabled>Continue to Details →</button>
+        </div>
+      </div>
+
+      <!-- STEP 2: Trip Details -->
+      <div class="step" id="step-2">
+        <div class="step-header">
+          <div class="step-num">2</div>
+          <h2>Trip Details</h2>
+        </div>
+        <div class="fields-grid">
+          <div class="field">
+            <label>Date *</label>
+            <input type="date" id="trip-date" oninput="updateSummary()" required/>
+          </div>
+          <div class="field">
+            <label>Pickup Time *</label>
+            <input type="time" id="trip-time" oninput="updateSummary()" required/>
+          </div>
+          <div class="field full">
+            <label>Pickup Location *</label>
+            <input type="text" id="pickup" placeholder="Street address or landmark" required/>
+          </div>
+          <div class="field full">
+            <label>Drop-off Location</label>
+            <input type="text" id="dropoff" placeholder="Destination (if applicable)"/>
+          </div>
+          <div class="field">
+            <label>Number of Passengers</label>
+            <select id="passengers">
+              <option>1</option><option>2</option><option>3</option><option>4</option><option>5+</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Trip Duration <span style="color:rgba(245,243,238,0.35)">(days, if interstate)</span></label>
+            <input type="number" id="trip-days" min="1" value="1" placeholder="1"/>
+          </div>
+          <div class="field full">
+            <label>Flight Number <span style="color:rgba(245,243,238,0.35)">(if airport transfer)</span></label>
+            <input type="text" id="flight-num" placeholder="e.g. WT 204"/>
+          </div>
+          <div class="field full">
+            <label>Special Requests / Notes</label>
+            <textarea id="notes" placeholder="Any preferences, accessibility needs, specific instructions..."></textarea>
+          </div>
+        </div>
+        <div class="step-nav">
+          <button class="btn-back" onclick="goStep(1)">← Back</button>
+          <button class="btn-next" onclick="goStep(3)">Continue to Your Details →</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: Customer Details -->
+      <div class="step" id="step-3">
+        <div class="step-header">
+          <div class="step-num">3</div>
+          <h2>Your Details</h2>
+        </div>
+        <div class="fields-grid">
+          <div class="field">
+            <label>Full Name *</label>
+            <input type="text" id="cust-name" placeholder="Your full name" required/>
+          </div>
+          <div class="field">
+            <label>Phone Number *</label>
+            <input type="tel" id="cust-phone" placeholder="+234 800 000 0000" required/>
+          </div>
+          <div class="field full">
+            <label>Email Address *</label>
+            <input type="email" id="cust-email" placeholder="your@email.com" required/>
+          </div>
+          <div class="field">
+            <label>Company / Organisation</label>
+            <input type="text" id="cust-company" placeholder="Optional"/>
+          </div>
+          <div class="field">
+            <label>Booking Type</label>
+            <select id="booking-type">
+              <option value="personal">Personal</option>
+              <option value="corporate">Corporate</option>
+              <option value="event">Event</option>
+            </select>
+          </div>
+          <div class="field full">
+            <label>How did you hear about us?</label>
+            <div class="radio-group" id="referral-group">
+              <label class="radio-opt" onclick="setReferral(this,'Instagram')"><input type="radio" name="ref"/>Instagram</label>
+              <label class="radio-opt" onclick="setReferral(this,'WhatsApp')"><input type="radio" name="ref"/>WhatsApp</label>
+              <label class="radio-opt" onclick="setReferral(this,'Referral')"><input type="radio" name="ref"/>Referral</label>
+              <label class="radio-opt" onclick="setReferral(this,'Google')"><input type="radio" name="ref"/>Google</label>
+              <label class="radio-opt" onclick="setReferral(this,'Returning Customer')"><input type="radio" name="ref"/>Returning Customer</label>
+              <label class="radio-opt" onclick="setReferral(this,'Other')"><input type="radio" name="ref"/>Other</label>
+            </div>
+          </div>
+          <div class="field full">
+            <label>Preferred Payment Method</label>
+            <select id="payment-method">
+              <option value="">Select...</option>
+              <option value="bank_transfer">Bank Transfer</option>
+              <option value="cash">Cash</option>
+              <option value="pos">POS / Card</option>
+            </select>
+          </div>
+        </div>
+        <div class="step-nav">
+          <button class="btn-back" onclick="goStep(2)">← Back</button>
+          <button class="btn-next" id="btn-submit" onclick="submitBooking()">Confirm Booking →</button>
+        </div>
+      </div>
+
+      <!-- SUCCESS -->
+      <div class="step" id="step-success">
+        <div class="success-page">
+          <div class="success-icon">✓</div>
+          <h2>Booking Confirmed</h2>
+          <p>Your booking request has been received. Our team will contact you within 30 minutes to finalise arrangements.</p>
+          <div class="booking-ref" id="booking-ref">REF: ALT-000000</div>
+          <button class="btn-next" onclick="resetBooking()">Make Another Booking</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUMMARY PANEL -->
+    <div class="summary-side">
+      <h3>Booking Summary</h3>
+      <div id="summary-content">
+        <p class="summary-empty">Select a vehicle and service to see your quote.</p>
+      </div>
+      <div class="note-box">
+        <strong>Note:</strong> Prices shown are estimates. Final quote confirmed by our team. Evening Extension &amp; Night Shift calculated per hour selected.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ ADMIN PAGE ══════════ -->
+<div id="page-admin" class="page">
+  <div class="admin-page">
+    <div class="admin-header">
+      <h1>Bookings <em style="font-family:var(--font-d);font-style:italic;color:var(--gold)">Dashboard</em></h1>
+      <p>Real-time overview of all bookings and business insights</p>
+    </div>
+
+    <!-- Google Sheets Setup -->
+    <div class="sheets-setup">
+      <h3>📊 Google Sheets Integration</h3>
+      <p>To auto-save every booking to Google Sheets, follow these steps:</p>
+      <p><strong style="color:var(--white)">1.</strong> Go to <a href="https://script.google.com" target="_blank" style="color:var(--gold)">script.google.com</a> → New Project<br>
+      <strong style="color:var(--white)">2.</strong> Paste the Apps Script code below → Deploy as Web App (Anyone can access)<br>
+      <strong style="color:var(--white)">3.</strong> Copy your Web App URL and paste it here:</p>
+      <div class="sheets-url-row">
+        <input type="text" id="sheets-url" placeholder="https://script.google.com/macros/s/YOUR_ID/exec"/>
+        <button class="btn-sm" onclick="saveSheetUrl()">Save URL</button>
+      </div>
+      <p style="margin-top:0.8rem;font-size:0.72rem;color:rgba(245,243,238,0.35)">Apps Script code is shown below the table. Copy and paste into Google Apps Script.</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row" id="admin-stats">
+      <div class="stat-card"><div class="s-label">Total Bookings</div><div class="s-val" id="stat-total">0</div><div class="s-sub">All time</div></div>
+      <div class="stat-card"><div class="s-label">Total Revenue Est.</div><div class="s-val" id="stat-rev">₦0</div><div class="s-sub">Sum of quoted prices</div></div>
+      <div class="stat-card"><div class="s-label">Most Popular</div><div class="s-val" id="stat-popular" style="font-size:1rem;margin-top:0.4rem">—</div><div class="s-sub">Top service</div></div>
+      <div class="stat-card"><div class="s-label">Top Vehicle</div><div class="s-val" id="stat-vehicle" style="font-size:1rem;margin-top:0.4rem">—</div><div class="s-sub">Most booked tier</div></div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-row">
+      <div class="chart-card">
+        <h4>Bookings by Service</h4>
+        <div class="bar-chart" id="chart-services"></div>
+      </div>
+      <div class="chart-card">
+        <h4>Bookings by Vehicle Tier</h4>
+        <div class="bar-chart" id="chart-vehicles"></div>
+      </div>
+    </div>
+
+    <!-- Bookings Table -->
+    <div class="table-card">
+      <h4>
+        All Bookings
+        <div style="display:flex;gap:0.5rem">
+          <button class="export-btn" onclick="exportCSV()">Export CSV</button>
+        </div>
+      </h4>
+      <div class="filter-row" id="filter-row">
+        <button class="filter-btn active" onclick="filterTable('all',this)">All</button>
+        <button class="filter-btn" onclick="filterTable('economy',this)">Economy</button>
+        <button class="filter-btn" onclick="filterTable('premium',this)">Premium</button>
+        <button class="filter-btn" onclick="filterTable('luxury',this)">Luxury</button>
+      </div>
+      <div class="table-wrap">
+        <table id="bookings-table">
+          <thead>
+            <tr>
+              <th>Ref</th><th>Date</th><th>Customer</th><th>Phone</th><th>Vehicle</th><th>Core Service</th><th>Add-ons</th><th>Pickup</th><th>Passengers</th><th>Est. Total</th><th>Source</th><th>Payment</th><th>Booked At</th>
+            </tr>
+          </thead>
+          <tbody id="bookings-tbody">
+            <tr><td colspan="13" style="text-align:center;color:var(--wm);padding:2rem;font-style:italic">No bookings yet. Complete a booking to see it here.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Apps Script Code -->
+    <div class="sheets-setup" style="max-width:100%">
+      <h3>📋 Google Apps Script Code</h3>
+      <p>Create a new Google Sheet, then go to Extensions → Apps Script and paste this code:</p>
+      <textarea readonly style="width:100%;background:var(--dark3);border:1px solid var(--wf);color:rgba(245,243,238,0.7);font-family:monospace;font-size:0.72rem;padding:1rem;margin-top:0.8rem;height:280px;outline:none;resize:vertical">
+function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  
+  // Add headers if first row is empty
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow([
+      'Ref','Booked At','Customer Name','Phone','Email','Company',
+      'Vehicle','Core Service','Add-ons','Date','Pickup Time',
+      'Pickup Location','Drop-off','Passengers','Trip Days',
+      'Flight Number','Notes','Booking Type','Referral Source',
+      'Payment Method','Estimated Total (NGN)'
+    ]);
+  }
+  
+  var data = JSON.parse(e.postData.contents);
+  sheet.appendRow([
+    data.ref, data.bookedAt, data.name, data.phone, data.email,
+    data.company, data.vehicle, data.coreService, data.addons,
+    data.date, data.time, data.pickup, data.dropoff,
+    data.passengers, data.tripDays, data.flightNum, data.notes,
+    data.bookingType, data.referral, data.payment, data.total
+  ]);
+  
+  return ContentService
+    .createTextOutput(JSON.stringify({status:'success'}))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doGet(e) {
+  return ContentService
+    .createTextOutput(JSON.stringify({status:'ok'}))
+    .setMimeType(ContentService.MimeType.JSON);
+}</textarea>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── PRICING DATA ──
+const PRICES = {
+  economy: {
+    half_day:49500, full_day:94000, airport:47500, interstate:null,
+    special_events:49500, evening_ext:17500, night_shift:19500
+  },
+  premium: {
+    half_day:84500, full_day:174000, airport:79500, interstate:247000,
+    special_events:149500, evening_ext:24500, night_shift:29500
+  },
+  luxury: {
+    half_day:109500, full_day:294000, airport:109500, interstate:394000,
+    special_events:309500, evening_ext:34500, night_shift:49500
+  }
+};
+
+const SERVICE_LABELS = {
+  half_day:'Half Day Rental', full_day:'Full Day Rental',
+  airport:'Airport Pickup/Drop-off', interstate:'Interstate Travel',
+  special_events:'Special Events', evening_ext:'Evening Extension',
+  night_shift:'Night Shift'
+};
+
+const VEHICLE_LABELS = {economy:'Economy', premium:'Premium', luxury:'Luxury'};
+
+// ── STATE ──
+let state = {
+  vehicle: null, coreService: null, addons: {},
+  addonHours: {evening_ext:1, night_shift:2},
+  referral: ''
+};
+
+// ── VEHICLE SELECT ──
+function selectVehicle(el) {
+  document.querySelectorAll('.vehicle-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  state.vehicle = el.dataset.vehicle;
+  updatePrices();
+  updateSummary();
+  validateStep1();
+}
+
+function updatePrices() {
+  if (!state.vehicle) return;
+  const p = PRICES[state.vehicle];
+  const fmt = v => v ? '₦' + v.toLocaleString() + (v < 50000 ? '' : '') : 'N/A';
+  const fmtHr = v => v ? '₦' + v.toLocaleString() + '/hr' : 'N/A';
+
+  document.getElementById('price-half_day').textContent = fmt(p.half_day);
+  document.getElementById('price-full_day').textContent = fmt(p.full_day);
+  document.getElementById('price-airport').textContent = fmt(p.airport);
+  document.getElementById('price-special_events').textContent = fmt(p.special_events);
+  document.getElementById('price-evening_ext').textContent = fmtHr(p.evening_ext);
+  document.getElementById('price-night_shift').textContent = fmtHr(p.night_shift);
+
+  // Interstate only for premium/luxury
+  const intEl = document.querySelector('[data-service="interstate"]');
+  if (state.vehicle === 'economy') {
+    intEl.classList.add('disabled');
+    document.getElementById('price-interstate').textContent = 'N/A';
+    if (state.coreService === 'interstate') { state.coreService = null; intEl.classList.remove('core-selected','selected'); }
+  } else {
+    intEl.classList.remove('disabled');
+    document.getElementById('price-interstate').textContent = fmt(p.interstate);
+  }
+}
+
+// ── CORE SERVICE ──
+function selectCore(el) {
+  if (el.classList.contains('disabled')) return;
+  document.querySelectorAll('[data-type="core"]').forEach(s => s.classList.remove('selected','core-selected'));
+  el.classList.add('selected','core-selected');
+  state.coreService = el.dataset.service;
+  updateSummary();
+  validateStep1();
+}
+
+// ── ADD-ONS ──
+function toggleAddon(el) {
+  const svc = el.dataset.service;
+  const hourEl = document.getElementById('hours-' + svc);
+  if (state.addons[svc]) {
+    delete state.addons[svc];
+    el.classList.remove('selected');
+    hourEl.classList.remove('show');
+  } else {
+    state.addons[svc] = true;
+    el.classList.add('selected');
+    hourEl.classList.add('show');
+  }
+  updateSummary();
+}
+
+function updateAddonHours(svc) {
+  const val = parseInt(document.getElementById('val-' + svc).value) || 1;
+  state.addonHours[svc] = val;
+  updateSummary();
+}
+
+// ── STEP VALIDATION ──
+function validateStep1() {
+  const ok = state.vehicle && state.coreService;
+  document.getElementById('btn-next-1').disabled = !ok;
+}
+
+// ── STEP NAVIGATION ──
+function goStep(n) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step-' + n).classList.add('active');
+  [1,2,3].forEach(i => {
+    const d = document.getElementById('dot-' + i);
+    d.classList.remove('active','done');
+    if (i < n) d.classList.add('done');
+    else if (i === n) d.classList.add('active');
+  });
+  const labels = ['','Select Vehicle & Service','Trip Details','Your Details'];
+  document.getElementById('progress-label').textContent = labels[n] || '';
+}
+
+// ── REFERRAL ──
+function setReferral(el, val) {
+  document.querySelectorAll('.radio-opt').forEach(r => r.classList.remove('selected'));
+  el.classList.add('selected');
+  state.referral = val;
+}
+
+// ── SUMMARY ──
+function updateSummary() {
+  const el = document.getElementById('summary-content');
+  if (!state.vehicle && !state.coreService) {
+    el.innerHTML = '<p class="summary-empty">Select a vehicle and service to see your quote.</p>';
+    return;
+  }
+  const p = PRICES[state.vehicle] || {};
+  let html = '';
+
+  if (state.vehicle) {
+    html += `<div class="summary-vehicle"><div class="tier">${state.vehicle.toUpperCase()}</div><div class="name">${VEHICLE_LABELS[state.vehicle]}</div></div>`;
+  }
+
+  let total = 0;
+  html += '<div class="summary-services">';
+  if (state.coreService && p[state.coreService]) {
+    const price = p[state.coreService];
+    let days = parseInt(document.getElementById('trip-days')?.value) || 1;
+    const subtotal = state.coreService === 'interstate' ? price * days : price;
+    total += subtotal;
+    html += `<div class="summary-row"><span class="label">${SERVICE_LABELS[state.coreService]}</span><span class="val">₦${subtotal.toLocaleString()}</span></div>`;
+    if (state.coreService === 'interstate' && days > 1) {
+      html += `<div class="summary-row addon"><span class="label">${days} days × ₦${price.toLocaleString()}</span><span class="val"></span></div>`;
+    }
+  }
+  Object.keys(state.addons).forEach(svc => {
+    const hrs = state.addonHours[svc] || 1;
+    const rate = p[svc] || 0;
+    const sub = rate * hrs;
+    total += sub;
+    html += `<div class="summary-row addon"><span class="label">+ ${SERVICE_LABELS[svc]} (${hrs}hr)</span><span class="val">₦${sub.toLocaleString()}</span></div>`;
+  });
+  html += '</div>';
+
+  const date = document.getElementById('trip-date')?.value;
+  const time = document.getElementById('trip-time')?.value;
+  if (date || time) {
+    html += `<div class="summary-row"><span class="label" style="color:var(--wm)">📅 ${date || ''} ${time || ''}</span></div>`;
+  }
+
+  if (total > 0) {
+    html += `<div class="summary-total summary-row"><span class="label">Estimated Total</span><span class="val">₦${total.toLocaleString()}</span></div>`;
+  }
+  el.innerHTML = html;
+}
+
+// ── SUBMIT ──
+async function submitBooking() {
+  const name = document.getElementById('cust-name').value.trim();
+  const phone = document.getElementById('cust-phone').value.trim();
+  const email = document.getElementById('cust-email').value.trim();
+  const pickup = document.getElementById('pickup').value.trim();
+  const date = document.getElementById('trip-date').value;
+
+  if (!name || !phone || !email || !pickup || !date) {
+    showToast('Please fill in all required fields.', true); return;
+  }
+
+  const p = PRICES[state.vehicle] || {};
+  let total = 0;
+  if (state.coreService && p[state.coreService]) {
+    const days = parseInt(document.getElementById('trip-days').value) || 1;
+    total += state.coreService === 'interstate' ? p[state.coreService] * days : p[state.coreService];
+  }
+  Object.keys(state.addons).forEach(svc => {
+    total += (p[svc] || 0) * (state.addonHours[svc] || 1);
+  });
+
+  const ref = 'ALT-' + Date.now().toString().slice(-6);
+  const booking = {
+    ref, bookedAt: new Date().toLocaleString('en-NG'),
+    name, phone, email,
+    company: document.getElementById('cust-company').value,
+    vehicle: VEHICLE_LABELS[state.vehicle],
+    coreService: SERVICE_LABELS[state.coreService],
+    addons: Object.keys(state.addons).map(s => SERVICE_LABELS[s] + '(' + state.addonHours[s] + 'hr)').join(', '),
+    date, time: document.getElementById('trip-time').value,
+    pickup, dropoff: document.getElementById('dropoff').value,
+    passengers: document.getElementById('passengers').value,
+    tripDays: document.getElementById('trip-days').value,
+    flightNum: document.getElementById('flight-num').value,
+    notes: document.getElementById('notes').value,
+    bookingType: document.getElementById('booking-type').value,
+    referral: state.referral,
+    payment: document.getElementById('payment-method').value,
+    total
+  };
+
+  // Save locally
+  const bookings = JSON.parse(localStorage.getItem('altgrg_bookings') || '[]');
+  bookings.push(booking);
+  localStorage.setItem('altgrg_bookings', JSON.stringify(bookings));
+
+  // Send to Google Sheets if URL set
+  const sheetUrl = localStorage.getItem('altgrg_sheet_url');
+  if (sheetUrl) {
+    try {
+      await fetch(sheetUrl, {
+        method:'POST', mode:'no-cors',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(booking)
+      });
+    } catch(e) { console.log('Sheet sync failed:', e); }
+  }
+
+  document.getElementById('booking-ref').textContent = 'REF: ' + ref;
+  goStep(4);
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step-success').classList.add('active');
+  refreshAdmin();
+  showToast('Booking confirmed! Ref: ' + ref);
+}
+
+function resetBooking() {
+  state = {vehicle:null, coreService:null, addons:{}, addonHours:{evening_ext:1, night_shift:2}, referral:''};
+  document.querySelectorAll('.vehicle-card').forEach(c => c.classList.remove('selected'));
+  document.querySelectorAll('.service-item').forEach(c => c.classList.remove('selected','core-selected'));
+  document.querySelectorAll('.hour-input').forEach(c => c.classList.remove('show'));
+  document.querySelectorAll('input[type=text],input[type=email],input[type=tel],input[type=date],input[type=time],textarea').forEach(i => i.value = '');
+  document.querySelectorAll('.radio-opt').forEach(r => r.classList.remove('selected'));
+  updateSummary();
+  goStep(1);
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step-1').classList.add('active');
+  document.getElementById('btn-next-1').disabled = true;
+}
+
+// ── ADMIN ──
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  if (page === 'admin') refreshAdmin();
+}
+
+function saveSheetUrl() {
+  const url = document.getElementById('sheets-url').value.trim();
+  if (!url) return;
+  localStorage.setItem('altgrg_sheet_url', url);
+  showToast('Google Sheets URL saved!');
+}
+
+function refreshAdmin() {
+  const bookings = JSON.parse(localStorage.getItem('altgrg_bookings') || '[]');
+  const savedUrl = localStorage.getItem('altgrg_sheet_url');
+  if (savedUrl) document.getElementById('sheets-url').value = savedUrl;
+
+  // Stats
+  const total = bookings.length;
+  const rev = bookings.reduce((s, b) => s + (b.total || 0), 0);
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-rev').textContent = '₦' + (rev / 1000).toFixed(0) + 'k';
+
+  // Top service
+  const svcCount = {};
+  const vehCount = {};
+  bookings.forEach(b => {
+    svcCount[b.coreService] = (svcCount[b.coreService] || 0) + 1;
+    vehCount[b.vehicle] = (vehCount[b.vehicle] || 0) + 1;
+  });
+  const topSvc = Object.entries(svcCount).sort((a,b) => b[1]-a[1])[0];
+  const topVeh = Object.entries(vehCount).sort((a,b) => b[1]-a[1])[0];
+  document.getElementById('stat-popular').textContent = topSvc ? topSvc[0].replace(' Rental','').replace(' Pickup/Drop-off','') : '—';
+  document.getElementById('stat-vehicle').textContent = topVeh ? topVeh[0].split('(')[0].trim() : '—';
+
+  // Charts
+  renderBarChart('chart-services', svcCount, total);
+  renderBarChart('chart-vehicles', vehCount, total);
+
+  // Table
+  renderTable(bookings, 'all');
+}
+
+function renderBarChart(id, counts, total) {
+  const el = document.getElementById(id);
+  if (!Object.keys(counts).length) { el.innerHTML = '<p style="font-size:0.75rem;color:var(--wm);font-style:italic">No data yet</p>'; return; }
+  const sorted = Object.entries(counts).sort((a,b) => b[1]-a[1]).slice(0,5);
+  const max = sorted[0][1];
+  el.innerHTML = sorted.map(([label, count]) =>
+    `<div class="bar-row">
+      <div class="bar-label">${label.replace(' Rental','').replace('Pickup/Drop-off','Airport')}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(count/max*100)}%"></div></div>
+      <div class="bar-val">${count} <span style="color:var(--wm)">(${Math.round(count/total*100)}%)</span></div>
+    </div>`
+  ).join('');
+}
+
+let currentFilter = 'all';
+function filterTable(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const bookings = JSON.parse(localStorage.getItem('altgrg_bookings') || '[]');
+  renderTable(bookings, filter);
+}
+
+function renderTable(bookings, filter) {
+  const tbody = document.getElementById('bookings-tbody');
+  const filtered = filter === 'all' ? bookings : bookings.filter(b => b.vehicle.toLowerCase().includes(filter));
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="13" style="text-align:center;color:var(--wm);padding:2rem;font-style:italic">No bookings yet.</td></tr>';
+    return;
+  }
+  const vBadge = v => {
+    if (v.toLowerCase().includes('economy')) return 'badge-eco';
+    if (v.toLowerCase().includes('premium') || v.toLowerCase().includes('lexus')) return 'badge-prem';
+    return 'badge-lux';
+  };
+  tbody.innerHTML = [...filtered].reverse().map(b =>
+    `<tr>
+      <td style="color:var(--gold);font-weight:500">${b.ref}</td>
+      <td>${b.date}</td>
+      <td>${b.name}</td>
+      <td>${b.phone}</td>
+      <td><span class="badge ${vBadge(b.vehicle)}">${b.vehicle.split('(')[0].trim()}</span></td>
+      <td>${b.coreService}</td>
+      <td style="color:var(--wm)">${b.addons || '—'}</td>
+      <td>${b.pickup}</td>
+      <td style="text-align:center">${b.passengers}</td>
+      <td style="color:var(--gold-l);font-weight:500">₦${(b.total||0).toLocaleString()}</td>
+      <td style="color:var(--wm)">${b.referral || '—'}</td>
+      <td style="color:var(--wm)">${b.payment || '—'}</td>
+      <td style="color:rgba(245,243,238,0.4);font-size:0.7rem">${b.bookedAt}</td>
+    </tr>`
+  ).join('');
+}
+
+function exportCSV() {
+  const bookings = JSON.parse(localStorage.getItem('altgrg_bookings') || '[]');
+  if (!bookings.length) { showToast('No bookings to export', true); return; }
+  const headers = ['Ref','Date','Customer','Phone','Email','Company','Vehicle','Core Service','Add-ons','Pickup','Drop-off','Passengers','Total','Referral','Payment','Booked At'];
+  const rows = bookings.map(b => [
+    b.ref, b.date, b.name, b.phone, b.email, b.company||'',
+    b.vehicle, b.coreService, b.addons||'', b.pickup, b.dropoff||'',
+    b.passengers, b.total, b.referral||'', b.payment||'', b.bookedAt
+  ].map(v => '"' + String(v).replace(/"/g,'""') + '"').join(','));
+  const csv = [headers.join(','), ...rows].join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'altgrg_bookings_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+  showToast('CSV exported!');
+}
+
+// ── TOAST ──
+function showToast(msg, error = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (error ? ' error' : '');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// Init
+validateStep1();
+</script>
+</body>
+</html>
