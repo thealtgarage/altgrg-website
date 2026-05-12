@@ -998,6 +998,9 @@ window.addEventListener('DOMContentLoaded', () => {
   const startDate = document.getElementById('trip-date');
   if (startDate) startDate.min = today;
 });
+
+// Show discount banner if active via URL
+if (activeDiscount) {
   window.addEventListener('DOMContentLoaded', () => {
     const hero = document.querySelector('.booking-hero');
     if (hero) {
@@ -1041,15 +1044,13 @@ function updatePrices() {
   document.getElementById('price-extension').textContent = fmtHr(p.extension);
   document.getElementById('price-night_shift').textContent = fmtHr(p.night_shift);
 
-  // Interstate only for premium/luxury
+  // Interstate only for premium/luxury — never overwrite the WhatsApp link
   const intEl = document.querySelector('[data-service="interstate"]');
   if (state.vehicle === 'economy') {
     intEl.classList.add('disabled');
-    document.getElementById('price-interstate').textContent = 'N/A';
     if (state.coreService === 'interstate') { state.coreService = null; intEl.classList.remove('core-selected','selected'); }
   } else {
     intEl.classList.remove('disabled');
-    document.getElementById('price-interstate').textContent = fmt(p.interstate) + ' starting';
   }
 
   // Extension available for all tiers
@@ -1460,7 +1461,6 @@ async function submitBooking() {
     time: pickupTime,
     pickup,
     dropoff: document.getElementById('dropoff').value,
-    passengers: document.getElementById('passengers').value,
     flightNum: document.getElementById('flight-num').value,
     notes: document.getElementById('notes').value,
     bookingType: document.getElementById('booking-type').value,
@@ -1665,7 +1665,7 @@ function renderTable(bookings, filter) {
   const tbody = document.getElementById('bookings-tbody');
   const filtered = filter === 'all' ? bookings : bookings.filter(b => b.vehicle.toLowerCase().includes(filter));
   if (!filtered.length) {
-    tbody.innerHTML = '<tr><td colspan="13" style="text-align:center;color:var(--wm);padding:2rem;font-style:italic">No bookings yet.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;color:var(--wm);padding:2rem;font-style:italic">No bookings yet.</td></tr>';
     return;
   }
   const vBadge = v => {
@@ -1673,35 +1673,34 @@ function renderTable(bookings, filter) {
     if (v.toLowerCase().includes('premium') || v.toLowerCase().includes('lexus')) return 'badge-prem';
     return 'badge-lux';
   };
-  tbody.innerHTML = [...filtered].reverse().map(b =>
-    `<tr>
-      <td style="color:var(--gold);font-weight:500">${b.ref}</td>
-      <td>${b.date}</td>
-      <td>${b.name}</td>
-      <td>${b.phone}</td>
-      <td><span class="badge ${vBadge(b.vehicle)}">${b.vehicle.split('(')[0].trim()}</span></td>
-      <td>${b.coreService}</td>
-      <td style="color:var(--wm)">${b.addons || '—'}</td>
-      <td>${b.pickup}</td>
-      <td style="text-align:center">${b.passengers}</td>
-      <td style="color:var(--gold-l);font-weight:500">₦${(b.total||0).toLocaleString()}</td>
-      <td style="color:var(--wm)">${b.referral || '—'}</td>
-      <td style="color:var(--wm)">${b.payment || '—'}</td>
-      <td style="color:rgba(245,243,238,0.4);font-size:0.7rem">${b.bookedAt}</td>
-    </tr>`
-  ).join('');
+  tbody.innerHTML = [...filtered].reverse().map(b => [
+    '<tr>',
+    '<td style="color:var(--gold);font-weight:500">' + b.ref + '</td>',
+    '<td>' + b.date + '</td>',
+    '<td>' + b.name + '</td>',
+    '<td>' + b.phone + '</td>',
+    '<td><span class="badge ' + vBadge(b.vehicle) + '">' + b.vehicle.split('(')[0].trim() + '</span></td>',
+    '<td>' + b.coreService + '</td>',
+    '<td style="color:var(--wm)">' + (b.addons || '—') + '</td>',
+    '<td>' + b.pickup + '</td>',
+    '<td style="color:var(--gold-l);font-weight:500">₦' + (b.total||0).toLocaleString() + '</td>',
+    '<td style="color:var(--wm)">' + (b.referral || '—') + '</td>',
+    '<td style="color:rgba(245,243,238,0.4);font-size:0.7rem">' + b.bookedAt + '</td>',
+    '</tr>'
+  ].join('')).join('');
 }
 
 function exportCSV() {
   const bookings = JSON.parse(localStorage.getItem('altgrg_bookings') || '[]');
   if (!bookings.length) { showToast('No bookings to export', true); return; }
-  const headers = ['Ref','Date','Customer','Phone','Email','Company','Vehicle','Core Service','Add-ons','Pickup','Drop-off','Passengers','Total','Referral','Payment','Booked At'];
-  const rows = bookings.map(b => [
-    b.ref, b.date, b.name, b.phone, b.email, b.company||'',
-    b.vehicle, b.coreService, b.addons||'', b.pickup, b.dropoff||'',
-    b.passengers, b.total, b.referral||'', b.payment||'', b.bookedAt
-  ].map(v => '"' + String(v).replace(/"/g,'""') + '"').join(','));
-  const csv = [headers.join(','), ...rows].join('\n');
+  const headers = ['Ref','Date','Customer','Phone','Email','Vehicle','Core Service','Add-ons','Pickup','Drop-off','Flight No','Total','Discount','Referral','Booked At'];
+  const esc = function(v) { return String(v || '').replace(/,/g, ';'); };
+  const rows = bookings.map(function(b) {
+    return [b.ref, b.date, b.name, b.phone, b.email, b.vehicle, b.coreService,
+      b.addons || '', b.pickup, b.dropoff || '', b.flightNum || '',
+      b.total, b.discountCode || '', b.referral || '', b.bookedAt].map(esc).join(',');
+  });
+  const csv = [headers.join(',')].concat(rows).join('\n');
   const a = document.createElement('a');
   a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
   a.download = 'altgrg_bookings_' + new Date().toISOString().slice(0,10) + '.csv';
