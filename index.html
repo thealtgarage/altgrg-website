@@ -710,28 +710,161 @@ tbody td{padding:0.75rem 1rem;color:var(--white);white-space:nowrap}
       <p>Create a new Google Sheet, then go to Extensions → Apps Script and paste this code:</p>
       <textarea readonly style="width:100%;background:var(--dark3);border:1px solid var(--wf);color:rgba(245,243,238,0.7);font-family:monospace;font-size:0.72rem;padding:1rem;margin-top:0.8rem;height:280px;outline:none;resize:vertical">
 function doPost(e) {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  
-  // Add headers if first row is empty
-  if (sheet.getLastRow() === 0) {
-    sheet.appendRow([
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var data = JSON.parse(e.postData.contents);
+  var tripDays = data.tripDays || 1;
+  var driverCost = 10000 * tripDays;
+  var revenue = data.total || 0;
+
+  // ── SHEET 1: Bookings ──
+  var bookingsSheet = ss.getSheetByName('Bookings') || ss.insertSheet('Bookings', 0);
+  if (bookingsSheet.getLastRow() === 0) {
+    bookingsSheet.appendRow([
       'Ref','Booked At','Customer Name','Phone','Email','Date of Birth','Company',
       'Vehicle','Core Service','Add-ons','Start Date','End Date','Trip Days','Pickup Time',
-      'Pickup Location','Drop-off','Passengers',
-      'Flight Number','Notes','Booking Type','Referral Source',
-      'Estimated Total (NGN)'
+      'Pickup Location','Drop-off','Passengers','Flight Number','Notes',
+      'Booking Type','Referral Source','Estimated Total (NGN)'
     ]);
+    var bookHeader = bookingsSheet.getRange(1, 1, 1, 22);
+    bookHeader.setBackground('#0A0A0A').setFontColor('#D4A825').setFontWeight('bold');
+    bookingsSheet.setFrozenRows(1);
   }
-  
-  var data = JSON.parse(e.postData.contents);
-  sheet.appendRow([
+  bookingsSheet.appendRow([
     data.ref, data.bookedAt, data.name, data.phone, data.email,
     data.dob, data.company, data.vehicle, data.coreService, data.addons,
     data.date, data.dateEnd, data.tripDays, data.time, data.pickup, data.dropoff,
     data.passengers, data.flightNum, data.notes,
     data.bookingType, data.referral, data.total
   ]);
-  
+
+  // ── SHEET 2: Profit Tracker ──
+  var profitSheet = ss.getSheetByName('Profit Tracker') || ss.insertSheet('Profit Tracker', 1);
+  if (profitSheet.getLastRow() === 0) {
+    profitSheet.appendRow([
+      'Ref','Booked At','Customer Name','Vehicle','Core Service',
+      'Start Date','End Date','Trip Days',
+      'Estimated Revenue (₦)','Driver Cost (₦)','Fuel Cost (₦)',
+      'Total Direct Cost (₦)','Estimated Profit (₦)','Margin (%)','Notes'
+    ]);
+    var profitHeader = profitSheet.getRange(1, 1, 1, 15);
+    profitHeader.setBackground('#0A0A0A').setFontColor('#D4A825').setFontWeight('bold');
+    profitSheet.setFrozenRows(1);
+  }
+  var profitRow = profitSheet.getLastRow() + 1;
+  profitSheet.appendRow([
+    data.ref, data.bookedAt, data.name, data.vehicle, data.coreService,
+    data.date, data.dateEnd, tripDays, revenue, driverCost,
+    '', '', '', '', ''
+  ]);
+  profitSheet.getRange(profitRow, 12).setFormula('=IF(K'+profitRow+'="",J'+profitRow+',J'+profitRow+'+K'+profitRow+')');
+  profitSheet.getRange(profitRow, 13).setFormula('=IF(L'+profitRow+'="","",I'+profitRow+'-L'+profitRow+')');
+  profitSheet.getRange(profitRow, 14).setFormula('=IF(AND(M'+profitRow+'<>"",I'+profitRow+'>0),TEXT(M'+profitRow+'/I'+profitRow+',"0.0%"),"")');
+  var profitVal = revenue - driverCost;
+  profitSheet.getRange(profitRow, 13).setFontColor(profitVal > 0 ? '#34A853' : '#EA4335');
+
+  // ── SHEET 3: Cost Analysis ──
+  var costSheet = ss.getSheetByName('Cost Analysis') || ss.insertSheet('Cost Analysis', 2);
+  if (costSheet.getLastRow() === 0) {
+    // Row 1: Fuel price config cell
+    costSheet.getRange('A1').setValue('⛽ FUEL PRICE PER LITRE (₦) — Update this cell when price changes:');
+    costSheet.getRange('A1').setFontWeight('bold').setFontColor('#D4A825').setBackground('#0A0A0A');
+    costSheet.getRange('B1').setValue(1330);
+    costSheet.getRange('B1').setBackground('#FFFF00').setFontColor('#0000FF').setFontWeight('bold')
+      .setNumberFormat('₦#,##0');
+    costSheet.getRange('C1').setValue('← Change this number when fuel price changes. All rows update automatically.');
+    costSheet.getRange('C1').setFontStyle('italic').setFontColor('#888888');
+
+    // Row 2: blank spacer
+    costSheet.getRange('A2').setValue('');
+
+    // Row 3: Headers
+    costSheet.appendRow([
+      'Booking REF','Date','Vehicle','Service','Trip Days',
+      'Predicted Fuel Cost (₦)','Driver Cost (₦)','Predicted Total Cost (₦)',
+      'Actual Fuel Cost (₦)','Actual Driver Cost (₦)','Actual Total Cost (₦)',
+      'Fuel Variance (₦)','Total Variance (₦)','Notes'
+    ]);
+    var costHeader = costSheet.getRange(3, 1, 1, 14);
+    costHeader.setBackground('#0A0A0A').setFontColor('#D4A825').setFontWeight('bold');
+    costSheet.setFrozenRows(3);
+
+    // Column widths
+    costSheet.setColumnWidth(1, 200);
+    costSheet.setColumnWidth(2, 110);
+    costSheet.setColumnWidth(3, 160);
+    costSheet.setColumnWidth(4, 160);
+    costSheet.setColumnWidth(5, 80);
+    for (var c = 6; c <= 13; c++) costSheet.setColumnWidth(c, 170);
+    costSheet.setColumnWidth(14, 160);
+  }
+
+  // Tank sizes (litres) × 50% × fuel price per day
+  var tankLexus = 87;
+  var tankMerc = 93;
+  var usageFraction = 0.5;
+
+  var costRow = costSheet.getLastRow() + 1;
+  var isLexus = data.vehicle.toLowerCase().indexOf('lexus') > -1;
+  var tankSize = isLexus ? tankLexus : tankMerc;
+
+  // Predicted fuel uses live fuel price from B1
+  var predictedFuelFormula = '=$B$1*' + tankSize + '*' + usageFraction + '*E' + costRow;
+  var driverFormula = '=10000*E' + costRow;
+  var predictedTotalFormula = '=F' + costRow + '+G' + costRow;
+  var actualTotalFormula = '=IF(AND(I' + costRow + '<>"",J' + costRow + '<>""),I' + costRow + '+J' + costRow + ',"")';
+  var fuelVarianceFormula = '=IF(I' + costRow + '<>"",I' + costRow + '-F' + costRow + ',"")';
+  var totalVarianceFormula = '=IF(K' + costRow + '<>"",K' + costRow + '-H' + costRow + ',"")';
+
+  costSheet.appendRow([
+    data.ref, data.date, data.vehicle, data.coreService, tripDays,
+    '', '', '',   // formulas added below
+    '', '',       // Actual Fuel & Driver — manual entry (yellow)
+    '', '', '', '' // formulas added below
+  ]);
+
+  // Set formulas
+  costSheet.getRange(costRow, 6).setFormula(predictedFuelFormula).setNumberFormat('₦#,##0');
+  costSheet.getRange(costRow, 7).setFormula(driverFormula).setNumberFormat('₦#,##0');
+  costSheet.getRange(costRow, 8).setFormula(predictedTotalFormula).setNumberFormat('₦#,##0');
+  costSheet.getRange(costRow, 9).setNumberFormat('₦#,##0');  // Actual Fuel — manual
+  costSheet.getRange(costRow, 10).setNumberFormat('₦#,##0'); // Actual Driver — manual
+  costSheet.getRange(costRow, 11).setFormula(actualTotalFormula).setNumberFormat('₦#,##0');
+  costSheet.getRange(costRow, 12).setFormula(fuelVarianceFormula).setNumberFormat('₦#,##0');
+  costSheet.getRange(costRow, 13).setFormula(totalVarianceFormula).setNumberFormat('₦#,##0');
+
+  // Yellow input cells for actual costs
+  costSheet.getRange(costRow, 9).setBackground('#FFFF00').setFontColor('#0000FF');
+  costSheet.getRange(costRow, 10).setBackground('#FFFF00').setFontColor('#0000FF');
+
+  // ── EMAIL NOTIFICATION ──
+  var emailBody = '🖤 New Booking on The Alt Garage!\n\n' +
+    'REF: ' + data.ref + '\n' +
+    'Booked At: ' + data.bookedAt + '\n\n' +
+    '── CUSTOMER ──\n' +
+    'Name: ' + data.name + '\n' +
+    'Phone: ' + data.phone + '\n' +
+    'Email: ' + data.email + '\n\n' +
+    '── BOOKING ──\n' +
+    'Vehicle: ' + data.vehicle + '\n' +
+    'Service: ' + data.coreService + '\n' +
+    'Start Date: ' + data.date + '\n' +
+    'End Date: ' + data.dateEnd + '\n' +
+    'Total Days: ' + tripDays + '\n' +
+    'Start Time: ' + data.time + '\n' +
+    'Pickup: ' + data.pickup + '\n' +
+    'Add-ons: ' + (data.addons || 'None') + '\n\n' +
+    '── FINANCIALS ──\n' +
+    'Estimated Total: ₦' + Number(revenue).toLocaleString() + '\n' +
+    'Driver Cost: ₦' + Number(driverCost).toLocaleString() + '\n' +
+    '50% Deposit Due: ₦' + Number(revenue / 2).toLocaleString() + '\n\n' +
+    'View full details in your Google Sheet.';
+
+  MailApp.sendEmail({
+    to: 'altgaragerentals@gmail.com',
+    subject: '🖤 New Booking — ' + data.ref + ' — ' + data.name,
+    body: emailBody
+  });
+
   return ContentService
     .createTextOutput(JSON.stringify({status:'success'}))
     .setMimeType(ContentService.MimeType.JSON);
