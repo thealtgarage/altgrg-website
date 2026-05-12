@@ -140,8 +140,20 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;justify-content
 .success-page{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:3rem 5%}
 .success-icon{width:64px;height:64px;border:2px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:1.5rem;color:var(--gold)}
 .success-page h2{font-family:var(--font-d);font-size:2rem;font-weight:300;margin-bottom:0.8rem}
-.success-page p{color:var(--wm);font-size:0.9rem;max-width:420px;margin-bottom:2rem}
-.booking-ref{background:var(--dark2);border:1px solid var(--wf);padding:0.7rem 1.5rem;font-size:0.8rem;color:var(--gold);letter-spacing:0.15em;margin-bottom:2rem}
+.success-page p{color:var(--wm);font-size:0.9rem;max-width:480px;margin-bottom:1rem}
+.booking-ref{background:var(--dark2);border:1px solid var(--wf);padding:0.7rem 1.5rem;font-size:0.8rem;color:var(--gold);letter-spacing:0.15em;margin-bottom:1rem}
+
+/* Booking confirmation summary */
+.confirm-summary{background:var(--dark2);border:1px solid var(--wf);padding:1.5rem;margin:1rem 0 1.5rem;text-align:left;width:100%;max-width:480px}
+.confirm-summary-title{font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:1rem;padding-bottom:0.6rem;border-bottom:1px solid var(--wf)}
+.confirm-row{display:flex;justify-content:space-between;align-items:flex-start;padding:0.4rem 0;font-size:0.82rem;gap:1rem;border-bottom:1px solid rgba(245,243,238,0.04)}
+.confirm-row:last-child{border-bottom:none}
+.confirm-row .c-label{color:var(--wm);flex:1;font-size:0.75rem;letter-spacing:0.05em}
+.confirm-row .c-val{font-weight:500;text-align:right;color:var(--white);font-size:0.82rem}
+.confirm-total{border-top:1px solid var(--wf)!important;margin-top:0.5rem;padding-top:0.8rem!important}
+.confirm-total .c-label{color:var(--white);font-weight:500}
+.confirm-total .c-val{color:var(--gold);font-family:var(--font-d);font-size:1.2rem!important}
+.confirm-deposit .c-val{color:rgba(212,168,37,0.7);font-size:0.78rem!important}
 
 /* ── ADMIN PAGE ── */
 .admin-page{padding:2rem 4%}
@@ -411,6 +423,20 @@ tbody td{padding:0.75rem 1rem;color:var(--white);white-space:nowrap}
             </div>
             <div class="service-price" id="price-special_events">—</div>
           </div>
+          <div class="service-item" data-service="night_shift" data-type="core" onclick="selectCore(this)">
+            <div class="service-item-left">
+              <div class="service-check"></div>
+              <div class="service-info"><h4>The Night Shift</h4><p>Starts 10pm · 4hr min, 8hr max · per hour</p></div>
+            </div>
+            <div class="service-price" id="price-night_shift">—</div>
+          </div>
+        </div>
+
+        <!-- Night Shift hour selector -->
+        <div class="hour-input" id="hours-night_shift" style="padding:0 1.1rem 0.8rem">
+          <label>Hours (4–8):</label>
+          <input type="number" min="4" max="8" value="4" id="val-night_shift" oninput="updateNightShiftHours()" />
+          <span style="font-size:0.72rem;color:var(--wm)">hr(s)</span>
         </div>
 
         <p style="font-size:0.75rem;color:var(--wm);margin-bottom:1rem;margin-top:1.8rem;letter-spacing:0.05em">Add-ons <span style="color:rgba(245,243,238,0.35)">(optional)</span></p>
@@ -418,25 +444,13 @@ tbody td{padding:0.75rem 1rem;color:var(--white);white-space:nowrap}
           <div class="service-item" data-service="extension" data-type="addon" onclick="toggleAddon(this)">
             <div class="service-item-left">
               <div class="service-check"></div>
-              <div class="service-info"><h4>Extension</h4><p>Per hour past 12-hour window · Premium only</p></div>
+              <div class="service-info"><h4>Extension</h4><p>Per hour past your service window</p></div>
             </div>
             <div class="service-price" id="price-extension">—</div>
           </div>
           <div class="hour-input" id="hours-extension">
             <label>Hours:</label>
             <input type="number" min="1" max="6" value="1" id="val-extension" oninput="updateAddonHours('extension')" />
-            <span style="font-size:0.72rem;color:var(--wm)">hr(s)</span>
-          </div>
-          <div class="service-item" data-service="night_shift" data-type="addon" onclick="toggleAddon(this)">
-            <div class="service-item-left">
-              <div class="service-check"></div>
-              <div class="service-info"><h4>Night Shift</h4><p>Starts 10pm · 4hr min, 8hr max · per hour</p></div>
-            </div>
-            <div class="service-price" id="price-night_shift">—</div>
-          </div>
-          <div class="hour-input" id="hours-night_shift">
-            <label>Hours (4–8):</label>
-            <input type="number" min="4" max="8" value="4" id="val-night_shift" oninput="updateAddonHours('night_shift')" />
             <span style="font-size:0.72rem;color:var(--wm)">hr(s)</span>
           </div>
         </div>
@@ -473,7 +487,24 @@ tbody td{padding:0.75rem 1rem;color:var(--white);white-space:nowrap}
               <option value="10:00">10:00 AM → ends 10:00 PM</option>
             </select>
           </div>
-          <!-- Generic pickup time for non-full-day -->
+          <!-- Half Day start time picker - shown only for half_day -->
+          <div class="field" id="halfday-time-field" style="display:none">
+            <label>Start Time * <span style="color:rgba(245,243,238,0.35)">(latest 4pm)</span></label>
+            <select id="halfday-start-time" oninput="updateSummary()">
+              <option value="06:00">6:00 AM → ends 12:00 PM</option>
+              <option value="07:00">7:00 AM → ends 1:00 PM</option>
+              <option value="08:00">8:00 AM → ends 2:00 PM</option>
+              <option value="09:00">9:00 AM → ends 3:00 PM</option>
+              <option value="10:00">10:00 AM → ends 4:00 PM</option>
+              <option value="11:00">11:00 AM → ends 5:00 PM</option>
+              <option value="12:00">12:00 PM → ends 6:00 PM</option>
+              <option value="13:00">1:00 PM → ends 7:00 PM</option>
+              <option value="14:00">2:00 PM → ends 8:00 PM</option>
+              <option value="15:00">3:00 PM → ends 9:00 PM</option>
+              <option value="16:00">4:00 PM → ends 10:00 PM</option>
+            </select>
+          </div>
+          <!-- Generic pickup time for non-full-day/half-day -->
           <div class="field" id="generic-time-field">
             <label>Pickup Time *</label>
             <input type="time" id="trip-time" oninput="updateSummary()" required/>
@@ -571,8 +602,15 @@ tbody td{padding:0.75rem 1rem;color:var(--white);white-space:nowrap}
           <h2>Thank You for Your Booking</h2>
           <p>Thank you for your provisional booking with The Alt Garage. We will be in touch to confirm your reservation and arrange next steps.</p>
           <div class="booking-ref" id="booking-ref">REF: ALT-000000</div>
-          <p style="font-size:0.8rem;color:var(--wm);margin-bottom:1.5rem">Please save your reference number. Our team will contact you on the phone number provided within 2 hours.</p>
-          <div style="display:flex;gap:1rem;flex-wrap:wrap;justify-content:center">
+
+          <!-- Booking Summary Card -->
+          <div class="confirm-summary" id="confirm-summary-card">
+            <div class="confirm-summary-title">Booking Summary</div>
+            <div id="confirm-summary-rows"></div>
+          </div>
+
+          <p style="font-size:0.78rem;color:var(--wm)">Please save your reference number. Our team will contact you within 2 hours.</p>
+          <div style="display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;margin-top:1.5rem">
             <a href="https://wa.me/2349135006180" target="_blank" class="btn-next" style="text-decoration:none;display:inline-block">WhatsApp Us</a>
             <button class="btn-back" onclick="resetBooking()">Make Another Booking</button>
           </div>
@@ -716,7 +754,7 @@ function doGet(e) {
 const PRICES = {
   economy: {
     half_day:49500, full_day:94000, airport:47500, interstate:null,
-    special_events:49500, extension:null, night_shift:19500
+    special_events:49500, extension:17500, night_shift:19500
   },
   premium: {
     half_day:84500, full_day:174000, airport:79500, interstate:247000,
@@ -724,7 +762,7 @@ const PRICES = {
   },
   luxury: {
     half_day:109500, full_day:294000, airport:109500, interstate:394000,
-    special_events:309500, extension:null, night_shift:49500
+    special_events:309500, extension:34500, night_shift:49500
   }
 };
 
@@ -732,7 +770,7 @@ const SERVICE_LABELS = {
   half_day:'Half Day Rental', full_day:'Full Day Rental',
   airport:'Airport Pickup/Drop-off', interstate:'Interstate Travel',
   special_events:'Special Events', extension:'Extension',
-  night_shift:'Night Shift'
+  night_shift:'The Night Shift'
 };
 
 const VEHICLE_LABELS = {
@@ -782,14 +820,9 @@ function updatePrices() {
     document.getElementById('price-interstate').textContent = fmt(p.interstate) + ' starting';
   }
 
-  // Extension only for premium
+  // Extension available for all tiers
   const extEl = document.querySelector('[data-service="extension"]');
-  if (state.vehicle !== 'premium') {
-    extEl.classList.add('disabled');
-    if (state.addons['extension']) { delete state.addons['extension']; extEl.classList.remove('selected'); document.getElementById('hours-extension').classList.remove('show'); }
-  } else {
-    extEl.classList.remove('disabled');
-  }
+  extEl.classList.remove('disabled');
 }
 
 // ── UPDATE DAYS from date range ──
@@ -815,13 +848,28 @@ function selectCore(el) {
   el.classList.add('selected','core-selected');
   state.coreService = el.dataset.service;
 
-  // Show/hide full day start time picker
+  // Show/hide full day / half day start time pickers
   const isFullDay = state.coreService === 'full_day';
+  const isHalfDay = state.coreService === 'half_day';
   document.getElementById('fullday-time-field').style.display = isFullDay ? 'flex' : 'none';
-  document.getElementById('generic-time-field').style.display = isFullDay ? 'none' : 'flex';
+  document.getElementById('halfday-time-field').style.display = isHalfDay ? 'flex' : 'none';
+  document.getElementById('generic-time-field').style.display = (isFullDay || isHalfDay) ? 'none' : 'flex';
+
+  // Show/hide night shift hour selector
+  const nightHours = document.getElementById('hours-night_shift');
+  nightHours.classList.toggle('show', state.coreService === 'night_shift');
 
   updateSummary();
   validateStep1();
+}
+
+// ── NIGHT SHIFT HOURS ──
+function updateNightShiftHours() {
+  let val = parseInt(document.getElementById('val-night_shift').value) || 4;
+  val = Math.min(8, Math.max(4, val));
+  document.getElementById('val-night_shift').value = val;
+  state.addonHours['night_shift'] = val;
+  updateSummary();
 }
 
 // ── ADD-ONS ──
@@ -878,10 +926,20 @@ function setReferral(el, val) {
 
 // ── DYNAMIC PRICING MULTIPLIERS ──
 function getServiceMultiplier(svc) {
-  // Services that multiply by number of days
+  if (svc === 'night_shift') return state.addonHours['night_shift'] || 4;
   const multiDayServices = ['full_day', 'half_day', 'interstate'];
   if (multiDayServices.includes(svc)) return state.tripDays || 1;
   return 1;
+}
+
+// ── TIME HELPER ──
+function getEndTime(startTime, hours) {
+  const [h] = startTime.split(':').map(Number);
+  const endH = (h + hours) % 24;
+  const ampm = endH >= 12 ? 'AM' : 'AM';
+  const display = endH > 12 ? endH - 12 : endH === 0 ? 12 : endH;
+  const suffix = endH >= 12 ? 'PM' : 'AM';
+  return `${display}:00 ${suffix}`;
 }
 
 // ── SUMMARY ──
@@ -908,15 +966,28 @@ function updateSummary() {
     total += subtotal;
     html += `<div class="summary-row"><span class="label">${SERVICE_LABELS[state.coreService]}</span><span class="val">₦${subtotal.toLocaleString()}</span></div>`;
     if (multiplier > 1) {
-      html += `<div class="summary-row addon"><span class="label">${multiplier} days × ₦${price.toLocaleString()}</span><span class="val"></span></div>`;
+      if (state.coreService === 'night_shift') {
+        html += `<div class="summary-row addon"><span class="label">${multiplier}hrs from 10pm · ends ${getEndTime('22:00', multiplier)}</span><span class="val"></span></div>`;
+      } else {
+        html += `<div class="summary-row addon"><span class="label">${multiplier} days × ₦${price.toLocaleString()}</span><span class="val"></span></div>`;
+      }
     }
 
-    // Show full day end time if applicable
+    // Show full day / half day end time in summary
     if (state.coreService === 'full_day') {
       const startTime = document.getElementById('fullday-start-time')?.value;
       if (startTime) {
         const [h] = startTime.split(':').map(Number);
         const endH = h + 12;
+        const fmt = h => h > 12 ? `${h-12}:00 PM` : h === 12 ? '12:00 PM' : `${h}:00 AM`;
+        html += `<div class="summary-row addon"><span class="label">⏰ ${fmt(h)} → ${fmt(endH)}</span><span class="val"></span></div>`;
+      }
+    }
+    if (state.coreService === 'half_day') {
+      const startTime = document.getElementById('halfday-start-time')?.value;
+      if (startTime) {
+        const [h] = startTime.split(':').map(Number);
+        const endH = h + 6;
         const fmt = h => h > 12 ? `${h-12}:00 PM` : h === 12 ? '12:00 PM' : `${h}:00 AM`;
         html += `<div class="summary-row addon"><span class="label">⏰ ${fmt(h)} → ${fmt(endH)}</span><span class="val"></span></div>`;
       }
@@ -988,8 +1059,11 @@ async function submitBooking() {
 
   // Get pickup time based on service
   const isFullDay = state.coreService === 'full_day';
+  const isHalfDay = state.coreService === 'half_day';
   const pickupTime = isFullDay
     ? document.getElementById('fullday-start-time').value
+    : isHalfDay
+    ? document.getElementById('halfday-start-time').value
     : document.getElementById('trip-time').value;
 
   const endDate = document.getElementById('trip-date-end').value;
@@ -1033,6 +1107,47 @@ async function submitBooking() {
 
   // Show success
   document.getElementById('booking-ref').textContent = 'REF: ' + ref;
+
+  // Build confirmation summary
+  const addonsText = Object.keys(state.addons).map(s =>
+    SERVICE_LABELS[s] + ' (' + state.addonHours[s] + 'hr)'
+  ).join(', ') || 'None';
+
+  const dateRange = (endDate && endDate !== date)
+    ? `${date} → ${endDate} (${state.tripDays} days)`
+    : date;
+
+  const dateDisplay = (endDate && endDate !== date) ? `${date} → ${endDate}` : date;
+  const rows = [
+    ['Name', name],
+    ['Phone', phone],
+    ['Email', email],
+    ['Vehicle', VEHICLE_LABELS[state.vehicle]],
+    ['Service', SERVICE_LABELS[state.coreService]],
+    ['Date & Time', `${dateDisplay} · ${pickupTime || '—'}`],
+    ['Total Days', state.tripDays === 1 ? '1 day' : `${state.tripDays} days`],
+    ['Pickup Location', pickup],
+    ['Add-ons', addonsText],
+  ];
+
+  let rowsHtml = rows.map(([label, val]) => `
+    <div class="confirm-row">
+      <span class="c-label">${label}</span>
+      <span class="c-val">${val || '—'}</span>
+    </div>`).join('');
+
+  rowsHtml += `
+    <div class="confirm-row confirm-total">
+      <span class="c-label">Estimated Total</span>
+      <span class="c-val">₦${total.toLocaleString()}</span>
+    </div>
+    <div class="confirm-row confirm-deposit">
+      <span class="c-label">50% Deposit Due</span>
+      <span class="c-val">₦${Math.round(total/2).toLocaleString()}</span>
+    </div>`;
+
+  document.getElementById('confirm-summary-rows').innerHTML = rowsHtml;
+
   document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
   document.getElementById('step-success').classList.add('active');
   refreshAdmin();
@@ -1048,8 +1163,10 @@ function resetBooking() {
   document.querySelectorAll('input[type=text],input[type=email],input[type=tel],input[type=date],input[type=time],textarea').forEach(i => i.value = '');
   document.querySelectorAll('.radio-opt').forEach(r => r.classList.remove('selected'));
   document.getElementById('fullday-time-field').style.display = 'none';
+  document.getElementById('halfday-time-field').style.display = 'none';
   document.getElementById('generic-time-field').style.display = 'flex';
   document.getElementById('days-display').style.display = 'none';
+  document.getElementById('hours-night_shift').classList.remove('show');
   document.getElementById('btn-submit').disabled = false;
   document.getElementById('btn-submit').textContent = 'Confirm Booking →';
   updateSummary();
