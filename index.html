@@ -578,7 +578,13 @@ tbody td{padding:0.75rem 1rem;color:var(--white);white-space:nowrap}
             <input type="text" id="cust-company" placeholder="Optional"/>
           </div>
           <div class="field full">
-            <label>How did you hear about us?</label>
+            <label>Discount Code <span style="color:rgba(245,243,238,0.35)">(if you have one)</span></label>
+            <div style="display:flex;gap:0.5rem">
+              <input type="text" id="discount-code" placeholder="Enter code e.g. ALTREF08" style="text-transform:uppercase;flex:1"/>
+              <button type="button" onclick="applyDiscountCode()" class="btn-sm" style="white-space:nowrap">Apply</button>
+            </div>
+            <div id="discount-msg" style="font-size:0.72rem;margin-top:0.3rem;display:none"></div>
+          </div>
             <div class="radio-group" id="referral-group">
               <label class="radio-opt" onclick="setReferral(this,'Instagram')"><input type="radio" name="ref"/>Instagram</label>
               <label class="radio-opt" onclick="setReferral(this,'WhatsApp')"><input type="radio" name="ref"/>WhatsApp</label>
@@ -723,9 +729,10 @@ function doPost(e) {
       'Ref','Booked At','Customer Name','Phone','Email','Date of Birth','Company',
       'Vehicle','Core Service','Add-ons','Start Date','End Date','Trip Days','Pickup Time',
       'Pickup Location','Drop-off','Passengers','Flight Number','Notes',
-      'Booking Type','Referral Source','Estimated Total (NGN)'
+      'Booking Type','Referral Source','Discount Code','Discount %',
+      'Original Total (NGN)','Estimated Total (NGN)'
     ]);
-    var bookHeader = bookingsSheet.getRange(1, 1, 1, 22);
+    var bookHeader = bookingsSheet.getRange(1, 1, 1, 25);
     bookHeader.setBackground('#0A0A0A').setFontColor('#D4A825').setFontWeight('bold');
     bookingsSheet.setFrozenRows(1);
   }
@@ -734,7 +741,8 @@ function doPost(e) {
     data.dob, data.company, data.vehicle, data.coreService, data.addons,
     data.date, data.dateEnd, data.tripDays, data.time, data.pickup, data.dropoff,
     data.passengers, data.flightNum, data.notes,
-    data.bookingType, data.referral, data.total
+    data.bookingType, data.referral, data.discountCode, data.discountPct,
+    data.originalTotal, data.total
   ]);
 
   // ── SHEET 2: Profit Tracker ──
@@ -912,6 +920,37 @@ const VEHICLE_LABELS = {
   luxury:'Luxury (Mercedes or similar)'
 };
 
+// ── DISCOUNT TIERS ──
+const DISCOUNTS = {
+  referral: { label: 'Referral Discount', pct: 0.08, code: 'ALTREF08' },
+  faf:      { label: 'Friends & Family Discount', pct: 0.15, code: 'ALTFAF15' }
+};
+
+// Detect discount from URL e.g. ?discount=referral
+const urlParams = new URLSearchParams(window.location.search);
+const urlDiscountKey = urlParams.get('discount') || '';
+let activeDiscount = DISCOUNTS[urlDiscountKey] || null;
+
+// Helper: apply discount to a price
+function applyDiscount(price) {
+  if (!activeDiscount || !price) return price;
+  return Math.round(price * (1 - activeDiscount.pct));
+}
+
+// Show discount banner if active via URL
+if (activeDiscount) {
+  window.addEventListener('DOMContentLoaded', () => {
+    const hero = document.querySelector('.booking-hero');
+    if (hero) {
+      const banner = document.createElement('div');
+      banner.id = 'discount-banner';
+      banner.style.cssText = 'background:rgba(212,168,37,0.12);border:1px solid rgba(212,168,37,0.35);padding:0.6rem 1.2rem;margin-top:1rem;font-size:0.8rem;color:#D4A825;display:flex;align-items:center;gap:0.5rem;';
+      banner.innerHTML = `🎉 <strong>${activeDiscount.label} (${Math.round(activeDiscount.pct*100)}% off)</strong> has been applied to your booking.`;
+      hero.appendChild(banner);
+    }
+  });
+}
+
 // ── STATE ──
 let state = {
   vehicle: null, coreService: null, addons: {},
@@ -932,8 +971,9 @@ function selectVehicle(el) {
 function updatePrices() {
   if (!state.vehicle) return;
   const p = PRICES[state.vehicle];
-  const fmt = v => v ? '₦' + v.toLocaleString() : 'N/A';
-  const fmtHr = v => v ? '₦' + v.toLocaleString() + '/hr' : 'N/A';
+  const d = pct => activeDiscount ? ` (${Math.round(activeDiscount.pct*100)}% off)` : '';
+  const fmt = v => v ? '₦' + applyDiscount(v).toLocaleString() : 'N/A';
+  const fmtHr = v => v ? '₦' + applyDiscount(v).toLocaleString() + '/hr' : 'N/A';
 
   document.getElementById('price-half_day').textContent = fmt(p.half_day) + '/day';
   document.getElementById('price-full_day').textContent = fmt(p.full_day) + '/day';
@@ -1089,13 +1129,21 @@ function updateSummary() {
     html += `<div class="summary-vehicle"><div class="tier">${state.vehicle.toUpperCase()}</div><div class="name">${VEHICLE_LABELS[state.vehicle]}</div></div>`;
   }
 
+  // Show active discount badge
+  if (activeDiscount) {
+    html += `<div style="background:rgba(212,168,37,0.12);border:1px solid rgba(212,168,37,0.3);padding:0.4rem 0.8rem;font-size:0.72rem;color:var(--gold);margin-bottom:0.8rem">🎉 ${activeDiscount.label} (${Math.round(activeDiscount.pct*100)}% off) applied</div>`;
+  }
+
+  let originalTotal = 0;
   let total = 0;
   html += '<div class="summary-services">';
 
   if (state.coreService && p[state.coreService]) {
-    const price = p[state.coreService];
+    const rawPrice = p[state.coreService];
+    const price = applyDiscount(rawPrice);
     const multiplier = getServiceMultiplier(state.coreService);
     const subtotal = price * multiplier;
+    originalTotal += rawPrice * multiplier;
     total += subtotal;
     html += `<div class="summary-row"><span class="label">${SERVICE_LABELS[state.coreService]}</span><span class="val">₦${subtotal.toLocaleString()}</span></div>`;
     if (multiplier > 1) {
@@ -1130,8 +1178,10 @@ function updateSummary() {
   // Add-ons
   Object.keys(state.addons).forEach(svc => {
     const hrs = state.addonHours[svc] || (svc === 'night_shift' ? 4 : 1);
-    const rate = p[svc] || 0;
+    const rawRate = p[svc] || 0;
+    const rate = applyDiscount(rawRate);
     const sub = rate * hrs;
+    originalTotal += rawRate * hrs;
     total += sub;
     const label = svc === 'night_shift' ? `Night Shift (${hrs}hrs from 10pm)` : `${SERVICE_LABELS[svc]} (${hrs}hr)`;
     html += `<div class="summary-row addon"><span class="label">+ ${label}</span><span class="val">₦${sub.toLocaleString()}</span></div>`;
@@ -1148,11 +1198,37 @@ function updateSummary() {
   }
 
   if (total > 0) {
+    // Show original price crossed out if discount active
+    if (activeDiscount && originalTotal !== total) {
+      const saving = originalTotal - total;
+      html += `<div class="summary-row addon"><span class="label" style="color:var(--wm)">Standard price</span><span class="val" style="text-decoration:line-through;color:var(--wm)">₦${originalTotal.toLocaleString()}</span></div>`;
+      html += `<div class="summary-row addon"><span class="label" style="color:var(--gold)">You save</span><span class="val" style="color:var(--gold)">−₦${saving.toLocaleString()}</span></div>`;
+    }
     html += `<div class="summary-total summary-row"><span class="label">Estimated Total</span><span class="val">₦${total.toLocaleString()}</span></div>`;
     html += `<div class="summary-row addon"><span class="label" style="font-size:0.68rem">50% deposit: ₦${Math.round(total/2).toLocaleString()}</span></div>`;
   }
 
   el.innerHTML = html;
+}
+
+// ── APPLY DISCOUNT CODE ──
+function applyDiscountCode() {
+  const code = document.getElementById('discount-code').value.trim().toUpperCase();
+  const msgEl = document.getElementById('discount-msg');
+  msgEl.style.display = 'block';
+
+  // Find matching discount by code
+  const match = Object.values(DISCOUNTS).find(d => d.code === code);
+  if (match) {
+    activeDiscount = match;
+    msgEl.style.color = '#D4A825';
+    msgEl.textContent = `✓ ${match.label} (${Math.round(match.pct*100)}% off) applied!`;
+    updatePrices();
+    updateSummary();
+  } else {
+    msgEl.style.color = '#EA4335';
+    msgEl.textContent = '✗ Invalid code. Please check and try again.';
+  }
 }
 
 // ── SUBMIT ──
@@ -1173,15 +1249,19 @@ async function submitBooking() {
   submitBtn.disabled = true;
   submitBtn.textContent = 'Processing...';
 
+  // Calculate total with discount applied
   const p = PRICES[state.vehicle] || {};
+  let originalTotal = 0;
   let total = 0;
-
   if (state.coreService && p[state.coreService]) {
     const multiplier = getServiceMultiplier(state.coreService);
-    total += p[state.coreService] * multiplier;
+    originalTotal += p[state.coreService] * multiplier;
+    total += applyDiscount(p[state.coreService]) * multiplier;
   }
   Object.keys(state.addons).forEach(svc => {
-    total += (p[svc] || 0) * (state.addonHours[svc] || 1);
+    const hrs = state.addonHours[svc] || 1;
+    originalTotal += (p[svc] || 0) * hrs;
+    total += applyDiscount(p[svc] || 0) * hrs;
   });
 
   // Generate readable ref: ALT-YYYYMMDD-XXXX
@@ -1200,6 +1280,7 @@ async function submitBooking() {
     : document.getElementById('trip-time').value;
 
   const endDate = document.getElementById('trip-date-end').value;
+  const discountCode = document.getElementById('discount-code').value.trim().toUpperCase() || (activeDiscount ? activeDiscount.code : '');
 
   const booking = {
     ref,
@@ -1220,6 +1301,9 @@ async function submitBooking() {
     notes: document.getElementById('notes').value,
     bookingType: document.getElementById('booking-type').value,
     referral: state.referral,
+    discountCode: discountCode || 'None',
+    discountPct: activeDiscount ? Math.round(activeDiscount.pct * 100) + '%' : 'None',
+    originalTotal,
     total
   };
 
@@ -1261,6 +1345,11 @@ async function submitBooking() {
     ['Total Days', state.tripDays === 1 ? '1 day' : `${state.tripDays} days`],
     ['Pickup Location', pickup],
     ['Add-ons', addonsText],
+    ...(activeDiscount ? [
+      ['Discount Applied', `${activeDiscount.label} (${Math.round(activeDiscount.pct*100)}% off)`],
+      ['Standard Price', `₦${originalTotal.toLocaleString()}`],
+      ['You Save', `₦${(originalTotal - total).toLocaleString()}`],
+    ] : []),
   ];
 
   let rowsHtml = rows.map(([label, val]) => `
@@ -1295,7 +1384,12 @@ function resetBooking() {
   document.querySelectorAll('.hour-input').forEach(c => c.classList.remove('show'));
   document.querySelectorAll('input[type=text],input[type=email],input[type=tel],input[type=date],input[type=time],textarea').forEach(i => i.value = '');
   document.querySelectorAll('.radio-opt').forEach(r => r.classList.remove('selected'));
-  document.getElementById('fullday-time-field').style.display = 'none';
+  // Reset discount if it came from a code (not URL)
+  if (!DISCOUNTS[urlDiscountKey]) activeDiscount = null;
+  const discountMsg = document.getElementById('discount-msg');
+  if (discountMsg) { discountMsg.style.display = 'none'; discountMsg.textContent = ''; }
+  const discountInput = document.getElementById('discount-code');
+  if (discountInput) discountInput.value = '';
   document.getElementById('halfday-time-field').style.display = 'none';
   document.getElementById('generic-time-field').style.display = 'flex';
   document.getElementById('days-display').style.display = 'none';
