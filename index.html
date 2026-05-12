@@ -356,14 +356,20 @@ tbody td{padding:0.75rem 1rem;color:var(--white);white-space:nowrap}
         <p style="font-size:0.75rem;color:var(--wm);margin-bottom:1rem;letter-spacing:0.05em">Select vehicle class</p>
         <div class="vehicle-grid" id="vehicle-grid">
           <div class="vehicle-card" data-vehicle="economy" onclick="selectVehicle(this)">
-            <div class="vehicle-name">Economy</div>
+            <div class="vehicle-tier">Economy</div>
+            <div class="vehicle-name">Toyota</div>
+            <div class="vehicle-eg">Comfortable & reliable</div>
           </div>
           <div class="vehicle-card" data-vehicle="premium" onclick="selectVehicle(this)">
             <div class="popular-badge">Most Popular</div>
-            <div class="vehicle-name">Premium</div>
+            <div class="vehicle-tier">Premium</div>
+            <div class="vehicle-name">Lexus or similar</div>
+            <div class="vehicle-eg">Executive & distinguished</div>
           </div>
           <div class="vehicle-card" data-vehicle="luxury" onclick="selectVehicle(this)">
-            <div class="vehicle-name">Luxury</div>
+            <div class="vehicle-tier">Luxury</div>
+            <div class="vehicle-name">Mercedes or similar</div>
+            <div class="vehicle-eg">The pinnacle of sophistication</div>
           </div>
         </div>
 
@@ -373,64 +379,64 @@ tbody td{padding:0.75rem 1rem;color:var(--white);white-space:nowrap}
           <div class="service-item" data-service="half_day" data-type="core" onclick="selectCore(this)">
             <div class="service-item-left">
               <div class="service-check"></div>
-              <div class="service-info"><h4>Half Day Rental</h4><p>6 hours</p></div>
+              <div class="service-info"><h4>Half Day Rental</h4><p>6 hours · select start date(s)</p></div>
             </div>
             <div class="service-price" id="price-half_day">—</div>
           </div>
           <div class="service-item" data-service="full_day" data-type="core" onclick="selectCore(this)">
             <div class="service-item-left">
               <div class="service-check"></div>
-              <div class="service-info"><h4>Full Day Rental</h4><p>8am – 6pm</p></div>
+              <div class="service-info"><h4>Full Day Rental</h4><p>12 hours · start time 6am–10am</p></div>
             </div>
             <div class="service-price" id="price-full_day">—</div>
           </div>
           <div class="service-item" data-service="airport" data-type="core" onclick="selectCore(this)">
             <div class="service-item-left">
               <div class="service-check"></div>
-              <div class="service-info"><h4>Airport Pickup / Drop-off</h4><p>Per trip</p></div>
+              <div class="service-info"><h4>Airport Pickup / Drop-off</h4><p>Per trip · fixed price</p></div>
             </div>
             <div class="service-price" id="price-airport">—</div>
           </div>
           <div class="service-item" data-service="interstate" data-type="core" onclick="selectCore(this)">
             <div class="service-item-left">
               <div class="service-check"></div>
-              <div class="service-info"><h4>Interstate Travel</h4><p>Daily — Premium &amp; Luxury only</p></div>
+              <div class="service-info"><h4>Interstate Travel</h4><p>Starting price · Premium & Luxury only</p></div>
             </div>
             <div class="service-price" id="price-interstate">—</div>
           </div>
           <div class="service-item" data-service="special_events" data-type="core" onclick="selectCore(this)">
             <div class="service-item-left">
               <div class="service-check"></div>
-              <div class="service-info"><h4>Special Events</h4><p>Weddings etc. · Per event</p></div>
+              <div class="service-info"><h4>Special Events</h4><p>Weddings & occasions · per event</p></div>
             </div>
             <div class="service-price" id="price-special_events">—</div>
           </div>
         </div>
 
-        <p style="font-size:0.75rem;color:var(--wm);margin-bottom:1rem;margin-top:1.8rem;letter-spacing:0.05em">Add-ons <span style="color:rgba(245,243,238,0.35)">(optional, stackable on core service)</span></p>
+        <p style="font-size:0.75rem;color:var(--wm);margin-bottom:1rem;margin-top:1.8rem;letter-spacing:0.05em">Add-ons <span style="color:rgba(245,243,238,0.35)">(optional)</span></p>
         <div class="service-list" id="addon-services">
-          <div class="service-item" data-service="evening_ext" data-type="addon" onclick="toggleAddon(this)">
+          <div class="service-item" data-service="extension" data-type="addon" onclick="toggleAddon(this)">
             <div class="service-item-left">
               <div class="service-check"></div>
-              <div class="service-info"><h4>Evening Extension</h4><p>6pm – 10pm · per hour</p></div>
+              <div class="service-info"><h4>Extension</h4><p>Per hour past 12-hour window · Premium only</p></div>
             </div>
-            <div class="service-price" id="price-evening_ext">—</div>
+            <div class="service-price" id="price-extension">—</div>
           </div>
-          <div class="hour-input" id="hours-evening_ext">
+          <div class="hour-input" id="hours-extension">
             <label>Hours:</label>
-            <input type="number" min="1" max="4" value="1" id="val-evening_ext" oninput="updateAddonHours('evening_ext')" />
+            <input type="number" min="1" max="6" value="1" id="val-extension" oninput="updateAddonHours('extension')" />
             <span style="font-size:0.72rem;color:var(--wm)">hr(s)</span>
           </div>
           <div class="service-item" data-service="night_shift" data-type="addon" onclick="toggleAddon(this)">
             <div class="service-item-left">
               <div class="service-check"></div>
-              <div class="service-info"><h4>Night Shift</h4><p>10pm – 5:59am · 2hr min · per hour</p></div>
+              <div class="service-info"><h4>Night Shift</h4><p>Starts 10pm · 4hr min, 8hr max · per hour</p></div>
             </div>
             <div class="service-price" id="price-night_shift">—</div>
           </div>
           <div class="hour-input" id="hours-night_shift">
-            <label>Hours:</label>
-            <input type="number" min="2" max="8" value="2" id="val-night_shift" oninput="updateAddonHours('night_shift')" />
+            <label>Hours (4–8):</label>
+            <input type="number" min="4" max="8" value="4" id="val-night_shift" oninput="updateAddonHours('night_shift')" />
             <span style="font-size:0.72rem;color:var(--wm)">hr(s)</span>
           </div>
         </div>
@@ -449,12 +455,32 @@ tbody td{padding:0.75rem 1rem;color:var(--white);white-space:nowrap}
         </div>
         <div class="fields-grid">
           <div class="field">
-            <label>Date *</label>
-            <input type="date" id="trip-date" oninput="updateSummary()" required/>
+            <label>Start Date *</label>
+            <input type="date" id="trip-date" oninput="updateDays();updateSummary();" required/>
           </div>
           <div class="field">
+            <label>End Date <span style="color:rgba(245,243,238,0.35)">(multi-day)</span></label>
+            <input type="date" id="trip-date-end" oninput="updateDays();updateSummary();"/>
+          </div>
+          <!-- Full Day start time picker - shown only for full_day -->
+          <div class="field" id="fullday-time-field" style="display:none">
+            <label>Start Time * <span style="color:rgba(245,243,238,0.35)">(6am–10am)</span></label>
+            <select id="fullday-start-time" oninput="updateSummary()">
+              <option value="06:00">6:00 AM → ends 6:00 PM</option>
+              <option value="07:00">7:00 AM → ends 7:00 PM</option>
+              <option value="08:00">8:00 AM → ends 8:00 PM</option>
+              <option value="09:00">9:00 AM → ends 9:00 PM</option>
+              <option value="10:00">10:00 AM → ends 10:00 PM</option>
+            </select>
+          </div>
+          <!-- Generic pickup time for non-full-day -->
+          <div class="field" id="generic-time-field">
             <label>Pickup Time *</label>
             <input type="time" id="trip-time" oninput="updateSummary()" required/>
+          </div>
+          <div class="field" id="days-display" style="display:none">
+            <label>Duration</label>
+            <input type="text" id="trip-days-display" readonly style="background:var(--dark3);color:var(--gold);font-weight:500"/>
           </div>
           <div class="field full">
             <label>Pickup Location *</label>
@@ -471,11 +497,7 @@ tbody td{padding:0.75rem 1rem;color:var(--white);white-space:nowrap}
             </select>
           </div>
           <div class="field">
-            <label>Trip Duration <span style="color:rgba(245,243,238,0.35)">(days, if interstate)</span></label>
-            <input type="number" id="trip-days" min="1" value="1" placeholder="1"/>
-          </div>
-          <div class="field full">
-            <label>Flight Number <span style="color:rgba(245,243,238,0.35)">(if airport transfer)</span></label>
+            <label>Flight Number <span style="color:rgba(245,243,238,0.35)">(if airport)</span></label>
             <input type="text" id="flight-num" placeholder="e.g. WT 204"/>
           </div>
           <div class="field full">
@@ -509,8 +531,8 @@ tbody td{padding:0.75rem 1rem;color:var(--white);white-space:nowrap}
             <input type="email" id="cust-email" placeholder="your@email.com" required/>
           </div>
           <div class="field">
-            <label>Company / Organisation</label>
-            <input type="text" id="cust-company" placeholder="Optional"/>
+            <label>Date of Birth *</label>
+            <input type="date" id="cust-dob" required/>
           </div>
           <div class="field">
             <label>Booking Type</label>
@@ -519,6 +541,10 @@ tbody td{padding:0.75rem 1rem;color:var(--white);white-space:nowrap}
               <option value="corporate">Corporate</option>
               <option value="event">Event</option>
             </select>
+          </div>
+          <div class="field full">
+            <label>Company / Organisation</label>
+            <input type="text" id="cust-company" placeholder="Optional"/>
           </div>
           <div class="field full">
             <label>How did you hear about us?</label>
@@ -531,15 +557,6 @@ tbody td{padding:0.75rem 1rem;color:var(--white);white-space:nowrap}
               <label class="radio-opt" onclick="setReferral(this,'Other')"><input type="radio" name="ref"/>Other</label>
             </div>
           </div>
-          <div class="field full">
-            <label>Preferred Payment Method</label>
-            <select id="payment-method">
-              <option value="">Select...</option>
-              <option value="bank_transfer">Bank Transfer</option>
-              <option value="cash">Cash</option>
-              <option value="pos">POS / Card</option>
-            </select>
-          </div>
         </div>
         <div class="step-nav">
           <button class="btn-back" onclick="goStep(2)">← Back</button>
@@ -551,10 +568,14 @@ tbody td{padding:0.75rem 1rem;color:var(--white);white-space:nowrap}
       <div class="step" id="step-success">
         <div class="success-page">
           <div class="success-icon">✓</div>
-          <h2>Booking Confirmed</h2>
-          <p>Your booking request has been received. Our team will contact you within 30 minutes to finalise arrangements.</p>
+          <h2>Thank You for Your Booking</h2>
+          <p>Thank you for your provisional booking with The Alt Garage. We will be in touch to confirm your reservation and arrange next steps.</p>
           <div class="booking-ref" id="booking-ref">REF: ALT-000000</div>
-          <button class="btn-next" onclick="resetBooking()">Make Another Booking</button>
+          <p style="font-size:0.8rem;color:var(--wm);margin-bottom:1.5rem">Please save your reference number. Our team will contact you on the phone number provided within 2 hours.</p>
+          <div style="display:flex;gap:1rem;flex-wrap:wrap;justify-content:center">
+            <a href="https://wa.me/2349135006180" target="_blank" class="btn-next" style="text-decoration:none;display:inline-block">WhatsApp Us</a>
+            <button class="btn-back" onclick="resetBooking()">Make Another Booking</button>
+          </div>
         </div>
       </div>
     </div>
@@ -566,7 +587,10 @@ tbody td{padding:0.75rem 1rem;color:var(--white);white-space:nowrap}
         <p class="summary-empty">Select a vehicle and service to see your quote.</p>
       </div>
       <div class="note-box">
-        <strong>Note:</strong> Prices shown are estimates. Final quote confirmed by our team. Evening Extension &amp; Night Shift calculated per hour selected.
+        <strong>Note:</strong> Prices shown are estimates. Final quote confirmed by our team. Extension & Night Shift calculated per hour selected.<br><br>
+        <strong>Contact us:</strong> 
+        <a href="https://wa.me/2349135006180" target="_blank" style="color:var(--gold)">WhatsApp: 0913 500 6180</a> · 
+        <a href="mailto:altgaragerentals@gmail.com" style="color:var(--gold)">altgaragerentals@gmail.com</a>
       </div>
     </div>
   </div>
@@ -653,21 +677,21 @@ function doPost(e) {
   // Add headers if first row is empty
   if (sheet.getLastRow() === 0) {
     sheet.appendRow([
-      'Ref','Booked At','Customer Name','Phone','Email','Company',
-      'Vehicle','Core Service','Add-ons','Date','Pickup Time',
-      'Pickup Location','Drop-off','Passengers','Trip Days',
+      'Ref','Booked At','Customer Name','Phone','Email','Date of Birth','Company',
+      'Vehicle','Core Service','Add-ons','Start Date','End Date','Trip Days','Pickup Time',
+      'Pickup Location','Drop-off','Passengers',
       'Flight Number','Notes','Booking Type','Referral Source',
-      'Payment Method','Estimated Total (NGN)'
+      'Estimated Total (NGN)'
     ]);
   }
   
   var data = JSON.parse(e.postData.contents);
   sheet.appendRow([
     data.ref, data.bookedAt, data.name, data.phone, data.email,
-    data.company, data.vehicle, data.coreService, data.addons,
-    data.date, data.time, data.pickup, data.dropoff,
-    data.passengers, data.tripDays, data.flightNum, data.notes,
-    data.bookingType, data.referral, data.payment, data.total
+    data.dob, data.company, data.vehicle, data.coreService, data.addons,
+    data.date, data.dateEnd, data.tripDays, data.time, data.pickup, data.dropoff,
+    data.passengers, data.flightNum, data.notes,
+    data.bookingType, data.referral, data.total
   ]);
   
   return ContentService
@@ -692,32 +716,36 @@ function doGet(e) {
 const PRICES = {
   economy: {
     half_day:49500, full_day:94000, airport:47500, interstate:null,
-    special_events:49500, evening_ext:17500, night_shift:19500
+    special_events:49500, extension:null, night_shift:19500
   },
   premium: {
     half_day:84500, full_day:174000, airport:79500, interstate:247000,
-    special_events:149500, evening_ext:24500, night_shift:29500
+    special_events:149500, extension:20000, night_shift:29500
   },
   luxury: {
     half_day:109500, full_day:294000, airport:109500, interstate:394000,
-    special_events:309500, evening_ext:34500, night_shift:49500
+    special_events:309500, extension:null, night_shift:49500
   }
 };
 
 const SERVICE_LABELS = {
   half_day:'Half Day Rental', full_day:'Full Day Rental',
   airport:'Airport Pickup/Drop-off', interstate:'Interstate Travel',
-  special_events:'Special Events', evening_ext:'Evening Extension',
+  special_events:'Special Events', extension:'Extension',
   night_shift:'Night Shift'
 };
 
-const VEHICLE_LABELS = {economy:'Economy', premium:'Premium', luxury:'Luxury'};
+const VEHICLE_LABELS = {
+  economy:'Economy (Toyota)',
+  premium:'Premium (Lexus or similar)',
+  luxury:'Luxury (Mercedes or similar)'
+};
 
 // ── STATE ──
 let state = {
   vehicle: null, coreService: null, addons: {},
-  addonHours: {evening_ext:1, night_shift:2},
-  referral: ''
+  addonHours: {extension:1, night_shift:4},
+  referral: '', tripDays: 1
 };
 
 // ── VEHICLE SELECT ──
@@ -733,14 +761,14 @@ function selectVehicle(el) {
 function updatePrices() {
   if (!state.vehicle) return;
   const p = PRICES[state.vehicle];
-  const fmt = v => v ? '₦' + v.toLocaleString() + (v < 50000 ? '' : '') : 'N/A';
+  const fmt = v => v ? '₦' + v.toLocaleString() : 'N/A';
   const fmtHr = v => v ? '₦' + v.toLocaleString() + '/hr' : 'N/A';
 
-  document.getElementById('price-half_day').textContent = fmt(p.half_day);
-  document.getElementById('price-full_day').textContent = fmt(p.full_day);
+  document.getElementById('price-half_day').textContent = fmt(p.half_day) + '/day';
+  document.getElementById('price-full_day').textContent = fmt(p.full_day) + '/day';
   document.getElementById('price-airport').textContent = fmt(p.airport);
   document.getElementById('price-special_events').textContent = fmt(p.special_events);
-  document.getElementById('price-evening_ext').textContent = fmtHr(p.evening_ext);
+  document.getElementById('price-extension').textContent = fmtHr(p.extension);
   document.getElementById('price-night_shift').textContent = fmtHr(p.night_shift);
 
   // Interstate only for premium/luxury
@@ -751,8 +779,33 @@ function updatePrices() {
     if (state.coreService === 'interstate') { state.coreService = null; intEl.classList.remove('core-selected','selected'); }
   } else {
     intEl.classList.remove('disabled');
-    document.getElementById('price-interstate').textContent = fmt(p.interstate);
+    document.getElementById('price-interstate').textContent = fmt(p.interstate) + ' starting';
   }
+
+  // Extension only for premium
+  const extEl = document.querySelector('[data-service="extension"]');
+  if (state.vehicle !== 'premium') {
+    extEl.classList.add('disabled');
+    if (state.addons['extension']) { delete state.addons['extension']; extEl.classList.remove('selected'); document.getElementById('hours-extension').classList.remove('show'); }
+  } else {
+    extEl.classList.remove('disabled');
+  }
+}
+
+// ── UPDATE DAYS from date range ──
+function updateDays() {
+  const start = document.getElementById('trip-date').value;
+  const end = document.getElementById('trip-date-end').value;
+  if (start && end && end >= start) {
+    const diff = Math.round((new Date(end) - new Date(start)) / (1000 * 60 * 60 * 24)) + 1;
+    state.tripDays = diff;
+    document.getElementById('trip-days-display').value = diff + (diff === 1 ? ' day' : ' days');
+    document.getElementById('days-display').style.display = 'flex';
+  } else if (start) {
+    state.tripDays = 1;
+    document.getElementById('days-display').style.display = 'none';
+  }
+  updateSummary();
 }
 
 // ── CORE SERVICE ──
@@ -761,12 +814,19 @@ function selectCore(el) {
   document.querySelectorAll('[data-type="core"]').forEach(s => s.classList.remove('selected','core-selected'));
   el.classList.add('selected','core-selected');
   state.coreService = el.dataset.service;
+
+  // Show/hide full day start time picker
+  const isFullDay = state.coreService === 'full_day';
+  document.getElementById('fullday-time-field').style.display = isFullDay ? 'flex' : 'none';
+  document.getElementById('generic-time-field').style.display = isFullDay ? 'none' : 'flex';
+
   updateSummary();
   validateStep1();
 }
 
 // ── ADD-ONS ──
 function toggleAddon(el) {
+  if (el.classList.contains('disabled')) return;
   const svc = el.dataset.service;
   const hourEl = document.getElementById('hours-' + svc);
   if (state.addons[svc]) {
@@ -782,7 +842,8 @@ function toggleAddon(el) {
 }
 
 function updateAddonHours(svc) {
-  const val = parseInt(document.getElementById('val-' + svc).value) || 1;
+  let val = parseInt(document.getElementById('val-' + svc).value) || 1;
+  if (svc === 'night_shift') { val = Math.min(8, Math.max(4, val)); document.getElementById('val-' + svc).value = val; }
   state.addonHours[svc] = val;
   updateSummary();
 }
@@ -805,6 +866,7 @@ function goStep(n) {
   });
   const labels = ['','Select Vehicle & Service','Trip Details','Your Details'];
   document.getElementById('progress-label').textContent = labels[n] || '';
+  window.scrollTo({top: 0, behavior: 'smooth'});
 }
 
 // ── REFERRAL ──
@@ -812,6 +874,14 @@ function setReferral(el, val) {
   document.querySelectorAll('.radio-opt').forEach(r => r.classList.remove('selected'));
   el.classList.add('selected');
   state.referral = val;
+}
+
+// ── DYNAMIC PRICING MULTIPLIERS ──
+function getServiceMultiplier(svc) {
+  // Services that multiply by number of days
+  const multiDayServices = ['full_day', 'half_day', 'interstate'];
+  if (multiDayServices.includes(svc)) return state.tripDays || 1;
+  return 1;
 }
 
 // ── SUMMARY ──
@@ -830,34 +900,54 @@ function updateSummary() {
 
   let total = 0;
   html += '<div class="summary-services">';
+
   if (state.coreService && p[state.coreService]) {
     const price = p[state.coreService];
-    let days = parseInt(document.getElementById('trip-days')?.value) || 1;
-    const subtotal = state.coreService === 'interstate' ? price * days : price;
+    const multiplier = getServiceMultiplier(state.coreService);
+    const subtotal = price * multiplier;
     total += subtotal;
     html += `<div class="summary-row"><span class="label">${SERVICE_LABELS[state.coreService]}</span><span class="val">₦${subtotal.toLocaleString()}</span></div>`;
-    if (state.coreService === 'interstate' && days > 1) {
-      html += `<div class="summary-row addon"><span class="label">${days} days × ₦${price.toLocaleString()}</span><span class="val"></span></div>`;
+    if (multiplier > 1) {
+      html += `<div class="summary-row addon"><span class="label">${multiplier} days × ₦${price.toLocaleString()}</span><span class="val"></span></div>`;
+    }
+
+    // Show full day end time if applicable
+    if (state.coreService === 'full_day') {
+      const startTime = document.getElementById('fullday-start-time')?.value;
+      if (startTime) {
+        const [h] = startTime.split(':').map(Number);
+        const endH = h + 12;
+        const fmt = h => h > 12 ? `${h-12}:00 PM` : h === 12 ? '12:00 PM' : `${h}:00 AM`;
+        html += `<div class="summary-row addon"><span class="label">⏰ ${fmt(h)} → ${fmt(endH)}</span><span class="val"></span></div>`;
+      }
     }
   }
+
+  // Add-ons
   Object.keys(state.addons).forEach(svc => {
-    const hrs = state.addonHours[svc] || 1;
+    const hrs = state.addonHours[svc] || (svc === 'night_shift' ? 4 : 1);
     const rate = p[svc] || 0;
     const sub = rate * hrs;
     total += sub;
-    html += `<div class="summary-row addon"><span class="label">+ ${SERVICE_LABELS[svc]} (${hrs}hr)</span><span class="val">₦${sub.toLocaleString()}</span></div>`;
+    const label = svc === 'night_shift' ? `Night Shift (${hrs}hrs from 10pm)` : `${SERVICE_LABELS[svc]} (${hrs}hr)`;
+    html += `<div class="summary-row addon"><span class="label">+ ${label}</span><span class="val">₦${sub.toLocaleString()}</span></div>`;
   });
+
   html += '</div>';
 
-  const date = document.getElementById('trip-date')?.value;
-  const time = document.getElementById('trip-time')?.value;
-  if (date || time) {
-    html += `<div class="summary-row"><span class="label" style="color:var(--wm)">📅 ${date || ''} ${time || ''}</span></div>`;
+  // Dates
+  const startDate = document.getElementById('trip-date')?.value;
+  const endDate = document.getElementById('trip-date-end')?.value;
+  if (startDate) {
+    const dateStr = endDate && endDate !== startDate ? `${startDate} → ${endDate}` : startDate;
+    html += `<div class="summary-row"><span class="label" style="color:var(--wm)">📅 ${dateStr}</span></div>`;
   }
 
   if (total > 0) {
     html += `<div class="summary-total summary-row"><span class="label">Estimated Total</span><span class="val">₦${total.toLocaleString()}</span></div>`;
+    html += `<div class="summary-row addon"><span class="label" style="font-size:0.68rem">50% deposit: ₦${Math.round(total/2).toLocaleString()}</span></div>`;
   }
+
   el.innerHTML = html;
 }
 
@@ -866,40 +956,63 @@ async function submitBooking() {
   const name = document.getElementById('cust-name').value.trim();
   const phone = document.getElementById('cust-phone').value.trim();
   const email = document.getElementById('cust-email').value.trim();
+  const dob = document.getElementById('cust-dob').value;
   const pickup = document.getElementById('pickup').value.trim();
   const date = document.getElementById('trip-date').value;
 
-  if (!name || !phone || !email || !pickup || !date) {
+  if (!name || !phone || !email || !dob || !pickup || !date) {
     showToast('Please fill in all required fields.', true); return;
   }
 
+  // Disable button to prevent double submission
+  const submitBtn = document.getElementById('btn-submit');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Processing...';
+
   const p = PRICES[state.vehicle] || {};
   let total = 0;
+
   if (state.coreService && p[state.coreService]) {
-    const days = parseInt(document.getElementById('trip-days').value) || 1;
-    total += state.coreService === 'interstate' ? p[state.coreService] * days : p[state.coreService];
+    const multiplier = getServiceMultiplier(state.coreService);
+    total += p[state.coreService] * multiplier;
   }
   Object.keys(state.addons).forEach(svc => {
     total += (p[svc] || 0) * (state.addonHours[svc] || 1);
   });
 
-  const ref = 'ALT-' + Date.now().toString().slice(-6);
+  // Generate readable ref: ALT-YYYYMMDD-XXXX
+  const now = new Date();
+  const dateStr = now.toISOString().slice(0,10).replace(/-/g,'');
+  const rand = Math.random().toString(36).substring(2,6).toUpperCase();
+  const ref = `ALT-${dateStr}-${rand}`;
+
+  // Get pickup time based on service
+  const isFullDay = state.coreService === 'full_day';
+  const pickupTime = isFullDay
+    ? document.getElementById('fullday-start-time').value
+    : document.getElementById('trip-time').value;
+
+  const endDate = document.getElementById('trip-date-end').value;
+
   const booking = {
-    ref, bookedAt: new Date().toLocaleString('en-NG'),
-    name, phone, email,
+    ref,
+    bookedAt: now.toLocaleString('en-NG'),
+    name, phone, email, dob,
     company: document.getElementById('cust-company').value,
     vehicle: VEHICLE_LABELS[state.vehicle],
     coreService: SERVICE_LABELS[state.coreService],
-    addons: Object.keys(state.addons).map(s => SERVICE_LABELS[s] + '(' + state.addonHours[s] + 'hr)').join(', '),
-    date, time: document.getElementById('trip-time').value,
-    pickup, dropoff: document.getElementById('dropoff').value,
+    addons: Object.keys(state.addons).map(s => SERVICE_LABELS[s] + ' (' + state.addonHours[s] + 'hr)').join(', '),
+    date,
+    dateEnd: endDate || date,
+    tripDays: state.tripDays,
+    time: pickupTime,
+    pickup,
+    dropoff: document.getElementById('dropoff').value,
     passengers: document.getElementById('passengers').value,
-    tripDays: document.getElementById('trip-days').value,
     flightNum: document.getElementById('flight-num').value,
     notes: document.getElementById('notes').value,
     bookingType: document.getElementById('booking-type').value,
     referral: state.referral,
-    payment: document.getElementById('payment-method').value,
     total
   };
 
@@ -918,26 +1031,33 @@ async function submitBooking() {
     });
   } catch(e) { console.log('Sheet sync failed:', e); }
 
+  // Show success
   document.getElementById('booking-ref').textContent = 'REF: ' + ref;
-  goStep(4);
   document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
   document.getElementById('step-success').classList.add('active');
   refreshAdmin();
-  showToast('Booking confirmed! Ref: ' + ref);
+  window.scrollTo({top: 0, behavior: 'smooth'});
+  showToast('Provisional booking submitted! Ref: ' + ref);
 }
 
 function resetBooking() {
-  state = {vehicle:null, coreService:null, addons:{}, addonHours:{evening_ext:1, night_shift:2}, referral:''};
+  state = {vehicle:null, coreService:null, addons:{}, addonHours:{extension:1, night_shift:4}, referral:'', tripDays:1};
   document.querySelectorAll('.vehicle-card').forEach(c => c.classList.remove('selected'));
   document.querySelectorAll('.service-item').forEach(c => c.classList.remove('selected','core-selected'));
   document.querySelectorAll('.hour-input').forEach(c => c.classList.remove('show'));
   document.querySelectorAll('input[type=text],input[type=email],input[type=tel],input[type=date],input[type=time],textarea').forEach(i => i.value = '');
   document.querySelectorAll('.radio-opt').forEach(r => r.classList.remove('selected'));
+  document.getElementById('fullday-time-field').style.display = 'none';
+  document.getElementById('generic-time-field').style.display = 'flex';
+  document.getElementById('days-display').style.display = 'none';
+  document.getElementById('btn-submit').disabled = false;
+  document.getElementById('btn-submit').textContent = 'Confirm Booking →';
   updateSummary();
   goStep(1);
   document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
   document.getElementById('step-1').classList.add('active');
   document.getElementById('btn-next-1').disabled = true;
+  window.scrollTo({top: 0, behavior: 'smooth'});
 }
 
 // ── ADMIN ──
