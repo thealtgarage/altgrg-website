@@ -197,6 +197,124 @@ tbody td{padding:0.75rem 1rem;color:var(--white);white-space:nowrap}
 .toast{position:fixed;bottom:2rem;right:2rem;background:var(--dark2);border:1px solid var(--gold);color:var(--white);padding:0.9rem 1.5rem;font-size:0.82rem;z-index:999;transform:translateY(100px);opacity:0;transition:all 0.35s;max-width:320px}
 .toast.show{transform:translateY(0);opacity:1}
 .toast.error{border-color:#e24b4a;color:#f09595}
+
+/* ═══════════════════════════════════════════
+   MOBILE RESPONSIVE STYLES
+   ═══════════════════════════════════════════ */
+
+/* TABLETS (≤ 1024px) */
+@media (max-width: 1024px) {
+  .booking-layout{grid-template-columns:1fr}
+  .summary-side{position:relative;top:0;height:auto;border-top:1px solid var(--wf);border-right:none;padding:2rem 5%}
+  .form-side{border-right:none}
+  .charts-row{grid-template-columns:1fr}
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+}
+
+/* MOBILE (≤ 768px) */
+@media (max-width: 768px) {
+  /* Nav */
+  nav{padding:0.8rem 4%;flex-wrap:wrap;gap:0.6rem}
+  .nav-logo{height:30px}
+  .tab-btn{font-size:0.6rem;padding:0.45rem 0.8rem;letter-spacing:0.1em}
+
+  /* Pages */
+  .page{padding-top:90px}
+
+  /* Booking hero */
+  .booking-hero{padding:2rem 5% 1.5rem}
+  .booking-hero h1{font-size:1.7rem;line-height:1.2}
+
+  /* Form side */
+  .form-side{padding:1.5rem 5%}
+  .step-header{margin-bottom:1.3rem;gap:0.7rem}
+  .step-header h2{font-size:1.15rem}
+  .step-num{width:28px;height:28px;font-size:0.7rem}
+  .progress{margin-bottom:1.3rem}
+  .progress-label{font-size:0.58rem;letter-spacing:0.1em}
+
+  /* Vehicle cards - keep 3 across but more compact */
+  .vehicle-grid{gap:0.5rem;margin-bottom:1.5rem}
+  .vehicle-card{padding:1.2rem 0.5rem}
+  .vehicle-name{font-size:1.05rem}
+  .popular-badge{font-size:0.5rem;padding:2px 6px;letter-spacing:0.1em;top:-8px}
+
+  /* Service items */
+  .service-item{padding:0.8rem 0.9rem;gap:0.6rem}
+  .service-info h4{font-size:0.82rem;line-height:1.3}
+  .service-info p{font-size:0.68rem;line-height:1.4}
+  .service-price{font-size:0.78rem}
+  .service-check{width:16px;height:16px}
+
+  /* Form fields - stack on mobile */
+  .fields-grid{grid-template-columns:1fr;gap:0.9rem}
+  .field input,.field select,.field textarea{font-size:16px;padding:0.7rem 0.85rem}
+  /* font-size:16px prevents iOS auto-zoom on focus */
+
+  .field label{font-size:0.6rem}
+
+  /* Radio group */
+  .radio-group{gap:0.4rem}
+  .radio-opt{font-size:0.7rem;padding:0.35rem 0.65rem}
+
+  /* Step nav buttons */
+  .step-nav{flex-direction:column-reverse;gap:0.7rem;align-items:stretch;margin-top:1.5rem}
+  .btn-back,.btn-next{width:100%;text-align:center;padding:0.85rem 1rem;font-size:0.72rem}
+
+  /* Summary panel becomes inline */
+  .summary-side{padding:1.8rem 5%}
+  .summary-side h3{font-size:1.05rem;margin-bottom:1rem}
+
+  /* Hour input */
+  .hour-input{padding:0 0.9rem 0.8rem}
+  .hour-input label{font-size:0.65rem}
+
+  /* Success page */
+  .success-page{padding:2rem 5%;min-height:50vh}
+  .success-page h2{font-size:1.5rem}
+  .success-page p{font-size:0.85rem}
+  .success-icon{width:54px;height:54px;font-size:1.3rem}
+
+  /* ADMIN PAGE */
+  .admin-page{padding:1.5rem 4%}
+  .admin-header h1{font-size:1.6rem}
+  .stats-row{grid-template-columns:1fr 1fr;gap:0.6rem}
+  .stat-card{padding:1rem}
+  .stat-card .s-val{font-size:1.5rem}
+  .stat-card .s-label{font-size:0.55rem;letter-spacing:0.13em}
+
+  /* Setup card */
+  .sheets-setup{padding:1.2rem}
+  .sheets-setup p{font-size:0.78rem}
+  .sheets-url-row{flex-direction:column;gap:0.5rem}
+  .sheets-url-row input{font-size:16px}
+
+  /* Charts */
+  .chart-card{padding:1.1rem}
+  .bar-label{width:80px;font-size:0.62rem}
+  .bar-val{width:50px;font-size:0.68rem}
+
+  /* Table - scrollable */
+  .table-card h4{padding:0.85rem 1rem;font-size:0.6rem;flex-direction:column;align-items:flex-start;gap:0.5rem}
+  .filter-row{padding:0.7rem 1rem;gap:0.4rem}
+  .filter-btn{font-size:0.6rem;padding:0.3rem 0.65rem}
+  thead th{padding:0.6rem 0.7rem;font-size:0.55rem}
+  tbody td{padding:0.6rem 0.7rem;font-size:0.72rem}
+
+  /* Toast - full width on mobile */
+  .toast{left:1rem;right:1rem;bottom:1rem;max-width:none;font-size:0.78rem;padding:0.8rem 1.1rem}
+}
+
+/* SMALL MOBILE (≤ 420px) */
+@media (max-width: 420px) {
+  .vehicle-grid{grid-template-columns:1fr;gap:0.6rem}
+  .vehicle-card{padding:1rem 0.8rem}
+  .booking-hero h1{font-size:1.5rem}
+  nav{padding:0.7rem 3%}
+  .nav-tabs{width:100%;justify-content:center}
+  .tab-btn{flex:1;text-align:center}
+}
+
 </style>
 </head>
 <body>
@@ -790,17 +908,15 @@ async function submitBooking() {
   bookings.push(booking);
   localStorage.setItem('altgrg_bookings', JSON.stringify(bookings));
 
-  // Send to Google Sheets if URL set
-  const sheetUrl = localStorage.getItem('altgrg_sheet_url');
-  if (sheetUrl) {
-    try {
-      await fetch(sheetUrl, {
-        method:'POST', mode:'no-cors',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify(booking)
-      });
-    } catch(e) { console.log('Sheet sync failed:', e); }
-  }
+  // Send to Google Sheets
+  const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwIWSpP5J6WzQKAOd2Agmh9V2Wg2NhVPlDJWXs8YZy-TBr4R1OTEkSAqEsvcUOjLaXGWg/exec';
+  try {
+    await fetch(GOOGLE_SHEETS_URL, {
+      method:'POST', mode:'no-cors',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(booking)
+    });
+  } catch(e) { console.log('Sheet sync failed:', e); }
 
   document.getElementById('booking-ref').textContent = 'REF: ' + ref;
   goStep(4);
