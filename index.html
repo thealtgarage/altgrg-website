@@ -941,7 +941,22 @@ function resetBooking() {
 }
 
 // ── ADMIN ──
+const ADMIN_PASSWORD = 'Alt.Grg70Admin';
+
 function showPage(page) {
+  // Password protection for admin page
+  if (page === 'admin') {
+    const isAuthenticated = sessionStorage.getItem('altgrg_admin_auth') === 'true';
+    if (!isAuthenticated) {
+      const password = prompt('Enter admin password:');
+      if (password !== ADMIN_PASSWORD) {
+        showToast('Incorrect password');
+        return;
+      }
+      sessionStorage.setItem('altgrg_admin_auth', 'true');
+    }
+  }
+  
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
