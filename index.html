@@ -391,30 +391,33 @@ tbody td{padding:0.75rem 1rem;color:var(--white);white-space:nowrap}
           <div class="service-item" data-service="half_day" data-type="core" onclick="selectCore(this)">
             <div class="service-item-left">
               <div class="service-check"></div>
-              <div class="service-info"><h4>Half Day Rental</h4><p>6 hours · select start date(s)</p></div>
+              <div class="service-info"><h4>Half Day Rental</h4><p>6 hours · start times: 6am – 4pm</p></div>
             </div>
             <div class="service-price" id="price-half_day">—</div>
           </div>
           <div class="service-item" data-service="full_day" data-type="core" onclick="selectCore(this)">
             <div class="service-item-left">
               <div class="service-check"></div>
-              <div class="service-info"><h4>Full Day Rental</h4><p>12 hours · start time 6am–10am</p></div>
+              <div class="service-info"><h4>Full Day Rental</h4><p>12 hours · start times: 6am – 10am</p></div>
             </div>
             <div class="service-price" id="price-full_day">—</div>
           </div>
           <div class="service-item" data-service="airport" data-type="core" onclick="selectCore(this)">
             <div class="service-item-left">
               <div class="service-check"></div>
-              <div class="service-info"><h4>Airport Pickup / Drop-off</h4><p>Per trip · fixed price</p></div>
+              <div class="service-info"><h4>Airport Pickup / Drop-off</h4><p id="airport-desc">Per trip</p></div>
             </div>
             <div class="service-price" id="price-airport">—</div>
           </div>
           <div class="service-item" data-service="interstate" data-type="core" onclick="selectCore(this)">
             <div class="service-item-left">
               <div class="service-check"></div>
-              <div class="service-info"><h4>Interstate Travel</h4><p>Starting price · Premium & Luxury only</p></div>
+              <div class="service-info">
+                <h4>Interstate Travel</h4>
+                <p>Premium & Luxury only · <a href="https://wa.me/2349135006180?text=Hi,%20I'd%20like%20to%20book%20an%20interstate%20trip%20with%20The%20Alt%20Garage." target="_blank" style="color:var(--gold);text-decoration:none" onclick="event.stopPropagation()">Book via WhatsApp →</a></p>
+              </div>
             </div>
-            <div class="service-price" id="price-interstate">—</div>
+            <div class="service-price" id="price-interstate"><a href="https://wa.me/2349135006180?text=Hi,%20I'd%20like%20to%20book%20an%20interstate%20trip%20with%20The%20Alt%20Garage." target="_blank" style="color:var(--gold);text-decoration:none;font-size:0.75rem" onclick="event.stopPropagation()">Contact us</a></div>
           </div>
           <div class="service-item" data-service="special_events" data-type="core" onclick="selectCore(this)">
             <div class="service-item-left">
@@ -470,13 +473,22 @@ tbody td{padding:0.75rem 1rem;color:var(--white);white-space:nowrap}
         <div class="fields-grid">
           <div class="field">
             <label>Start Date *</label>
-            <input type="date" id="trip-date" oninput="updateDays();updateSummary();" required/>
+            <input type="date" id="trip-date" oninput="validateDates();updateDays();updateSummary();" required/>
           </div>
-          <div class="field">
+          <div class="field" id="end-date-field">
             <label>End Date <span style="color:rgba(245,243,238,0.35)">(multi-day)</span></label>
-            <input type="date" id="trip-date-end" oninput="updateDays();updateSummary();"/>
+            <input type="date" id="trip-date-end" oninput="validateDates();updateDays();updateSummary();"/>
           </div>
-          <!-- Full Day start time picker - shown only for full_day -->
+          <div class="field full" style="margin-top:-0.5rem">
+            <label class="radio-opt" id="single-day-check" style="cursor:pointer;border:none;padding:0;color:var(--wm);font-size:0.78rem;gap:0.5rem;display:flex;align-items:center">
+              <input type="checkbox" id="is-single-day" onchange="toggleSingleDay()" style="width:14px;height:14px;accent-color:var(--gold);display:inline"/>
+              Is this a day's booking?
+            </label>
+          </div>
+          <div class="field" id="date-error-field" style="display:none">
+            <p style="color:#EA4335;font-size:0.72rem" id="date-error-msg"></p>
+          </div>
+          <!-- Full Day start time picker -->
           <div class="field" id="fullday-time-field" style="display:none">
             <label>Start Time * <span style="color:rgba(245,243,238,0.35)">(6am–10am)</span></label>
             <select id="fullday-start-time" oninput="updateSummary()">
@@ -487,7 +499,7 @@ tbody td{padding:0.75rem 1rem;color:var(--white);white-space:nowrap}
               <option value="10:00">10:00 AM → ends 10:00 PM</option>
             </select>
           </div>
-          <!-- Half Day start time picker - shown only for half_day -->
+          <!-- Half Day start time picker -->
           <div class="field" id="halfday-time-field" style="display:none">
             <label>Start Time * <span style="color:rgba(245,243,238,0.35)">(latest 4pm)</span></label>
             <select id="halfday-start-time" oninput="updateSummary()">
@@ -504,7 +516,7 @@ tbody td{padding:0.75rem 1rem;color:var(--white);white-space:nowrap}
               <option value="16:00">4:00 PM → ends 10:00 PM</option>
             </select>
           </div>
-          <!-- Generic pickup time for non-full-day/half-day -->
+          <!-- Generic pickup time -->
           <div class="field" id="generic-time-field">
             <label>Pickup Time *</label>
             <input type="time" id="trip-time" oninput="updateSummary()" required/>
@@ -512,6 +524,20 @@ tbody td{padding:0.75rem 1rem;color:var(--white);white-space:nowrap}
           <div class="field" id="days-display" style="display:none">
             <label>Duration</label>
             <input type="text" id="trip-days-display" readonly style="background:var(--dark3);color:var(--gold);font-weight:500"/>
+          </div>
+          <!-- Airport from question (shown for Full Day and Half Day) -->
+          <div class="field full" id="airport-from-field" style="display:none">
+            <label>Will you be travelling from the airport? *</label>
+            <select id="airport-from" onchange="toggleFlightNumber()">
+              <option value="">Select...</option>
+              <option value="yes">Yes — arriving from airport</option>
+              <option value="no">No — standard pickup</option>
+            </select>
+          </div>
+          <!-- Flight number field -->
+          <div class="field full" id="flight-num-field" style="display:none">
+            <label id="flight-num-label">Flight Number *</label>
+            <input type="text" id="flight-num" placeholder="e.g. WT 204"/>
           </div>
           <div class="field full">
             <label>Pickup Location *</label>
@@ -521,16 +547,6 @@ tbody td{padding:0.75rem 1rem;color:var(--white);white-space:nowrap}
             <label>Drop-off Location</label>
             <input type="text" id="dropoff" placeholder="Destination (if applicable)"/>
           </div>
-          <div class="field">
-            <label>Number of Passengers</label>
-            <select id="passengers">
-              <option>1</option><option>2</option><option>3</option><option>4</option><option>5+</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Flight Number <span style="color:rgba(245,243,238,0.35)">(if airport)</span></label>
-            <input type="text" id="flight-num" placeholder="e.g. WT 204"/>
-          </div>
           <div class="field full">
             <label>Special Requests / Notes</label>
             <textarea id="notes" placeholder="Any preferences, accessibility needs, specific instructions..."></textarea>
@@ -538,7 +554,7 @@ tbody td{padding:0.75rem 1rem;color:var(--white);white-space:nowrap}
         </div>
         <div class="step-nav">
           <button class="btn-back" onclick="goStep(1)">← Back</button>
-          <button class="btn-next" onclick="goStep(3)">Continue to Your Details →</button>
+          <button class="btn-next" id="btn-next-2" onclick="validateStep2()">Continue to Your Details →</button>
         </div>
       </div>
 
@@ -711,6 +727,32 @@ tbody td{padding:0.75rem 1rem;color:var(--white);white-space:nowrap}
     </div>
 
     <!-- Apps Script Code -->
+    <div class="sheets-setup" style="max-width:100%;margin-top:1.5rem">
+      <h3>📝 Google Form REF Validation Script</h3>
+      <p>To restrict your feedback form to customers with a valid booking REF, go to your Google Form → ⋮ menu → Script editor, and paste this code:</p>
+      <textarea readonly style="width:100%;background:var(--dark3);border:1px solid var(--wf);color:rgba(245,243,238,0.7);font-family:monospace;font-size:0.72rem;padding:1rem;margin-top:0.8rem;height:220px;outline:none;resize:vertical">
+function validateBookingRef(e) {
+  var ss = SpreadsheetApp.openById('YOUR_GOOGLE_SHEET_ID');
+  var sheet = ss.getSheetByName('Bookings');
+  var refs = sheet.getRange(2, 1, sheet.getLastRow()-1, 1).getValues().flat();
+  var submittedRef = e.response.getItemResponses()
+    .find(r => r.getItem().getTitle().toLowerCase().includes('booking ref'))
+    .getResponse().trim().toUpperCase();
+  if (!refs.includes(submittedRef)) {
+    e.response.getItemResponses().forEach(r => r.getResponse());
+    throw new Error('Invalid booking reference. Only verified customers can submit feedback.');
+  }
+}
+
+function setupTrigger() {
+  var form = FormApp.getActiveForm();
+  ScriptApp.newTrigger('validateBookingRef')
+    .forForm(form)
+    .onFormSubmit()
+    .create();
+}</textarea>
+      <p style="margin-top:0.8rem;font-size:0.72rem;color:rgba(245,243,238,0.35)">Replace YOUR_GOOGLE_SHEET_ID with your sheet ID from the URL. Run setupTrigger() once to activate. Make sure your form has a question titled "Booking Reference".</p>
+    </div>
     <div class="sheets-setup" style="max-width:100%">
       <h3>📋 Google Apps Script Code</h3>
       <p>Create a new Google Sheet, then go to Extensions → Apps Script and paste this code:</p>
@@ -728,21 +770,34 @@ function doPost(e) {
     bookingsSheet.appendRow([
       'Ref','Booked At','Customer Name','Phone','Email','Date of Birth','Company',
       'Vehicle','Core Service','Add-ons','Start Date','End Date','Trip Days','Pickup Time',
-      'Pickup Location','Drop-off','Passengers','Flight Number','Notes',
+      'Pickup Location','Drop-off','Flight Number','Notes',
       'Booking Type','Referral Source','Discount Code','Discount %',
-      'Original Total (NGN)','Estimated Total (NGN)'
+      'Original Total (NGN)','Estimated Total (NGN)','Customer Type'
     ]);
     var bookHeader = bookingsSheet.getRange(1, 1, 1, 25);
     bookHeader.setBackground('#0A0A0A').setFontColor('#D4A825').setFontWeight('bold');
     bookingsSheet.setFrozenRows(1);
   }
+  // ── CHECK FOR REPEAT CUSTOMER ──
+  var allData = bookingsSheet.getDataRange().getValues();
+  var isReturning = false;
+  for (var r = 2; r <= allData.length; r++) {
+    var rowPhone = allData[r-1][3]; // Phone column
+    var rowEmail = allData[r-1][4]; // Email column
+    if ((rowPhone && rowPhone == data.phone) || (rowEmail && rowEmail == data.email)) {
+      isReturning = true;
+      break;
+    }
+  }
+  var customerType = isReturning ? 'Returning' : 'New';
+
   bookingsSheet.appendRow([
     data.ref, data.bookedAt, data.name, data.phone, data.email,
     data.dob, data.company, data.vehicle, data.coreService, data.addons,
     data.date, data.dateEnd, data.tripDays, data.time, data.pickup, data.dropoff,
-    data.passengers, data.flightNum, data.notes,
+    data.flightNum, data.notes,
     data.bookingType, data.referral, data.discountCode, data.discountPct,
-    data.originalTotal, data.total
+    data.originalTotal, data.total, customerType
   ]);
 
   // ── SHEET 2: Profit Tracker ──
@@ -937,8 +992,12 @@ function applyDiscount(price) {
   return Math.round(price * (1 - activeDiscount.pct));
 }
 
-// Show discount banner if active via URL
-if (activeDiscount) {
+// Set minimum date to today on load
+window.addEventListener('DOMContentLoaded', () => {
+  const today = new Date().toISOString().split('T')[0];
+  const startDate = document.getElementById('trip-date');
+  if (startDate) startDate.min = today;
+});
   window.addEventListener('DOMContentLoaded', () => {
     const hero = document.querySelector('.booking-hero');
     if (hero) {
@@ -998,7 +1057,111 @@ function updatePrices() {
   extEl.classList.remove('disabled');
 }
 
-// ── UPDATE DAYS from date range ──
+// ── DATE VALIDATION ──
+function validateDates() {
+  const today = new Date().toISOString().split('T')[0];
+  const start = document.getElementById('trip-date').value;
+  const end = document.getElementById('trip-date-end').value;
+  const errField = document.getElementById('date-error-field');
+  const errMsg = document.getElementById('date-error-msg');
+
+  // Enforce today as minimum for start date
+  document.getElementById('trip-date').min = today;
+
+  if (start && start < today) {
+    errField.style.display = 'block';
+    errMsg.textContent = 'Start date cannot be in the past.';
+    document.getElementById('trip-date').value = '';
+    return false;
+  }
+  if (start && end && end < start) {
+    errField.style.display = 'block';
+    errMsg.textContent = 'End date cannot be before the start date.';
+    document.getElementById('trip-date-end').value = '';
+    return false;
+  }
+  errField.style.display = 'none';
+  return true;
+}
+
+// ── SINGLE DAY TOGGLE ──
+function toggleSingleDay() {
+  const isSingle = document.getElementById('is-single-day').checked;
+  const endField = document.getElementById('end-date-field');
+  const endInput = document.getElementById('trip-date-end');
+  if (isSingle) {
+    endField.style.opacity = '0.3';
+    endField.style.pointerEvents = 'none';
+    endInput.value = '';
+    state.tripDays = 1;
+    document.getElementById('days-display').style.display = 'none';
+  } else {
+    endField.style.opacity = '1';
+    endField.style.pointerEvents = 'auto';
+  }
+  updateSummary();
+}
+
+// ── FLIGHT NUMBER TOGGLE ──
+function toggleFlightNumber() {
+  const val = document.getElementById('airport-from').value;
+  const flightField = document.getElementById('flight-num-field');
+  flightField.style.display = val === 'yes' ? 'flex' : 'none';
+}
+
+// ── SHOW/HIDE AIRPORT FROM QUESTION ──
+function updateAirportFromVisibility() {
+  const airportField = document.getElementById('airport-from-field');
+  const flightField = document.getElementById('flight-num-field');
+  const isAirport = state.coreService === 'airport';
+  const isFullOrHalf = state.coreService === 'full_day' || state.coreService === 'half_day';
+
+  if (isAirport) {
+    // Airport — flight number mandatory, no question needed
+    airportField.style.display = 'none';
+    flightField.style.display = 'flex';
+    document.getElementById('flight-num-label').textContent = 'Flight Number *';
+  } else if (isFullOrHalf) {
+    // Full/Half Day — show the question
+    airportField.style.display = 'flex';
+    const val = document.getElementById('airport-from').value;
+    flightField.style.display = val === 'yes' ? 'flex' : 'none';
+  } else {
+    // All other services — hide both
+    airportField.style.display = 'none';
+    flightField.style.display = 'none';
+    document.getElementById('airport-from').value = '';
+    document.getElementById('flight-num').value = '';
+  }
+}
+
+// ── STEP 2 VALIDATION ──
+function validateStep2() {
+  const start = document.getElementById('trip-date').value;
+  const pickup = document.getElementById('pickup').value.trim();
+  const isAirport = state.coreService === 'airport';
+  const isFullOrHalf = state.coreService === 'full_day' || state.coreService === 'half_day';
+  const airportFrom = document.getElementById('airport-from').value;
+  const flightNum = document.getElementById('flight-num').value.trim();
+
+  if (!start) { showToast('Please select a start date.', true); return; }
+  if (!pickup) { showToast('Please enter a pickup location.', true); return; }
+
+  // Flight number mandatory for airport
+  if (isAirport && !flightNum) {
+    showToast('Please enter your flight number for airport pickup/drop-off.', true); return;
+  }
+  // Flight number mandatory if arriving from airport on full/half day
+  if (isFullOrHalf && airportFrom === 'yes' && !flightNum) {
+    showToast('Please enter your flight number.', true); return;
+  }
+  // Must answer airport question for full/half day
+  if (isFullOrHalf && !airportFrom) {
+    showToast('Please indicate whether you are travelling from the airport.', true); return;
+  }
+
+  goStep(3);
+}
 function updateDays() {
   const start = document.getElementById('trip-date').value;
   const end = document.getElementById('trip-date-end').value;
@@ -1032,6 +1195,7 @@ function selectCore(el) {
   const nightHours = document.getElementById('hours-night_shift');
   nightHours.classList.toggle('show', state.coreService === 'night_shift');
 
+  updateAirportFromVisibility();
   updateSummary();
   validateStep1();
 }
@@ -1391,9 +1555,17 @@ function resetBooking() {
   const discountInput = document.getElementById('discount-code');
   if (discountInput) discountInput.value = '';
   document.getElementById('halfday-time-field').style.display = 'none';
+  document.getElementById('fullday-time-field').style.display = 'none';
   document.getElementById('generic-time-field').style.display = 'flex';
   document.getElementById('days-display').style.display = 'none';
   document.getElementById('hours-night_shift').classList.remove('show');
+  document.getElementById('is-single-day').checked = false;
+  document.getElementById('end-date-field').style.opacity = '1';
+  document.getElementById('end-date-field').style.pointerEvents = 'auto';
+  document.getElementById('airport-from-field').style.display = 'none';
+  document.getElementById('airport-from').value = '';
+  document.getElementById('flight-num-field').style.display = 'none';
+  document.getElementById('date-error-field').style.display = 'none';
   document.getElementById('btn-submit').disabled = false;
   document.getElementById('btn-submit').textContent = 'Confirm Booking →';
   updateSummary();
