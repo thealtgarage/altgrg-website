@@ -473,11 +473,11 @@ tbody td{padding:0.75rem 1rem;color:var(--white);white-space:nowrap}
         <div class="fields-grid">
           <div class="field">
             <label>Start Date *</label>
-            <input type="text" id="trip-date" placeholder="YYYY/MM/DD" maxlength="10" oninput="formatDateInput(this);validateDates();updateDays();updateSummary();" required/>
+            <input type="date" id="trip-date" oninput="validateDates();updateDays();updateSummary();" required/>
           </div>
           <div class="field" id="end-date-field">
             <label>End Date <span style="color:rgba(245,243,238,0.35)">(multi-day)</span></label>
-            <input type="text" id="trip-date-end" placeholder="YYYY/MM/DD" maxlength="10" oninput="formatDateInput(this);validateDates();updateDays();updateSummary();"/>
+            <input type="date" id="trip-date-end" oninput="validateDates();updateDays();updateSummary();"/>
           </div>
           <div class="field full" style="margin-top:-0.5rem">
             <label class="radio-opt" id="single-day-check" style="cursor:pointer;border:none;padding:0;color:var(--wm);font-size:0.78rem;gap:0.5rem;display:flex;align-items:center">
@@ -579,7 +579,7 @@ tbody td{padding:0.75rem 1rem;color:var(--white);white-space:nowrap}
           </div>
           <div class="field">
             <label>Date of Birth *</label>
-            <input type="text" id="cust-dob" placeholder="YYYY/MM/DD" maxlength="10" oninput="formatDateInput(this)" required/>
+            <input type="date" id="cust-dob" required/>
           </div>
           <div class="field">
             <label>Booking Type</label>
@@ -994,7 +994,12 @@ function applyDiscount(price) {
   return Math.round(price * (1 - activeDiscount.pct));
 }
 
-// Date inputs are text fields - validation handled in validateDates()
+// Set minimum date to today on load
+window.addEventListener('DOMContentLoaded', () => {
+  const today = new Date().toISOString().split('T')[0];
+  const startDate = document.getElementById('trip-date');
+  if (startDate) startDate.min = today;
+});
 
 // Show discount banner if active via URL
 if (activeDiscount) {
@@ -1079,18 +1084,18 @@ function toISO(dateStr) {
 // ── DATE VALIDATION ──
 function validateDates() {
   const today = new Date().toISOString().split('T')[0];
-  const start = toISO(document.getElementById('trip-date').value);
-  const end = toISO(document.getElementById('trip-date-end').value);
+  const start = document.getElementById('trip-date').value;
+  const end = document.getElementById('trip-date-end').value;
   const errField = document.getElementById('date-error-field');
   const errMsg = document.getElementById('date-error-msg');
 
-  if (start && start.length === 10 && start < today) {
+  if (start && start < today) {
     errField.style.display = 'block';
     errMsg.textContent = 'Start date cannot be in the past.';
     document.getElementById('trip-date').value = '';
     return false;
   }
-  if (start && end && end.length === 10 && end < start) {
+  if (start && end && end < start) {
     errField.style.display = 'block';
     errMsg.textContent = 'End date cannot be before the start date.';
     document.getElementById('trip-date-end').value = '';
@@ -1153,7 +1158,7 @@ function updateAirportFromVisibility() {
 
 // ── STEP 2 VALIDATION ──
 function validateStep2() {
-  const start = toISO(document.getElementById('trip-date').value);
+  const start = document.getElementById('trip-date').value;
   const pickup = document.getElementById('pickup').value.trim();
   const isAirport = state.coreService === 'airport';
   const isFullOrHalf = state.coreService === 'full_day' || state.coreService === 'half_day';
@@ -1179,14 +1184,14 @@ function validateStep2() {
   goStep(3);
 }
 function updateDays() {
-  const start = toISO(document.getElementById('trip-date').value);
-  const end = toISO(document.getElementById('trip-date-end').value);
-  if (start && start.length === 10 && end && end.length === 10 && end >= start) {
+  const start = document.getElementById('trip-date').value;
+  const end = document.getElementById('trip-date-end').value;
+  if (start && end && end >= start) {
     const diff = Math.round((new Date(end) - new Date(start)) / (1000 * 60 * 60 * 24)) + 1;
     state.tripDays = diff;
     document.getElementById('trip-days-display').value = diff + (diff === 1 ? ' day' : ' days');
     document.getElementById('days-display').style.display = 'flex';
-  } else if (start && start.length === 10) {
+  } else if (start) {
     state.tripDays = 1;
     document.getElementById('days-display').style.display = 'none';
   }
@@ -1420,7 +1425,7 @@ async function submitBooking() {
   const email = document.getElementById('cust-email').value.trim();
   const dob = document.getElementById('cust-dob').value;
   const pickup = document.getElementById('pickup').value.trim();
-  const date = toISO(document.getElementById('trip-date').value);
+  const date = document.getElementById('trip-date').value;
 
   if (!name || !phone || !email || !dob || !pickup || !date) {
     showToast('Please fill in all required fields.', true); return;
@@ -1465,7 +1470,7 @@ async function submitBooking() {
     ? document.getElementById('halfday-start-time').value
     : document.getElementById('trip-time').value;
 
-  const endDate = toISO(document.getElementById('trip-date-end').value);
+  const endDate = document.getElementById('trip-date-end').value;
   const discountCode = document.getElementById('discount-code').value.trim().toUpperCase() || (activeDiscount ? activeDiscount.code : '');
 
   const booking = {
