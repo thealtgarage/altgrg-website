@@ -473,11 +473,11 @@ tbody td{padding:0.75rem 1rem;color:var(--white);white-space:nowrap}
         <div class="fields-grid">
           <div class="field">
             <label>Start Date *</label>
-            <input type="date" id="trip-date" oninput="validateDates();updateDays();updateSummary();" required/>
+            <input type="text" id="trip-date" placeholder="YYYY/MM/DD" maxlength="10" oninput="formatDateInput(this);validateDates();updateDays();updateSummary();" required/>
           </div>
           <div class="field" id="end-date-field">
             <label>End Date <span style="color:rgba(245,243,238,0.35)">(multi-day)</span></label>
-            <input type="date" id="trip-date-end" oninput="validateDates();updateDays();updateSummary();"/>
+            <input type="text" id="trip-date-end" placeholder="YYYY/MM/DD" maxlength="10" oninput="formatDateInput(this);validateDates();updateDays();updateSummary();"/>
           </div>
           <div class="field full" style="margin-top:-0.5rem">
             <label class="radio-opt" id="single-day-check" style="cursor:pointer;border:none;padding:0;color:var(--wm);font-size:0.78rem;gap:0.5rem;display:flex;align-items:center">
@@ -530,7 +530,7 @@ tbody td{padding:0.75rem 1rem;color:var(--white);white-space:nowrap}
             <label>Will you be travelling from the airport? *</label>
             <select id="airport-from" onchange="toggleFlightNumber()">
               <option value="">Select...</option>
-              <option value="yes">Yes — arriving from airport</option>
+              <option value="yes">Yes — arriving from an airport</option>
               <option value="no">No — standard pickup</option>
             </select>
           </div>
@@ -579,7 +579,7 @@ tbody td{padding:0.75rem 1rem;color:var(--white);white-space:nowrap}
           </div>
           <div class="field">
             <label>Date of Birth *</label>
-            <input type="date" id="cust-dob" required/>
+            <input type="text" id="cust-dob" placeholder="YYYY/MM/DD" maxlength="10" oninput="formatDateInput(this)" required/>
           </div>
           <div class="field">
             <label>Booking Type</label>
@@ -992,12 +992,7 @@ function applyDiscount(price) {
   return Math.round(price * (1 - activeDiscount.pct));
 }
 
-// Set minimum date to today on load
-window.addEventListener('DOMContentLoaded', () => {
-  const today = new Date().toISOString().split('T')[0];
-  const startDate = document.getElementById('trip-date');
-  if (startDate) startDate.min = today;
-});
+// Date inputs are text fields - validation handled in validateDates()
 
 // Show discount banner if active via URL
 if (activeDiscount) {
@@ -1058,24 +1053,42 @@ function updatePrices() {
   extEl.classList.remove('disabled');
 }
 
+// ── DATE FORMAT (YYYY/MM/DD) ──
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  // Handle both YYYY-MM-DD and YYYY/MM/DD
+  return dateStr.replace(/-/g, '/');
+}
+
+// Auto-format as user types: inserts slashes automatically
+function formatDateInput(el) {
+  let v = el.value.replace(/\D/g, ''); // digits only
+  if (v.length >= 5) v = v.slice(0,4) + '/' + v.slice(4);
+  if (v.length >= 8) v = v.slice(0,7) + '/' + v.slice(7,9);
+  el.value = v.slice(0, 10);
+}
+
+// Convert YYYY/MM/DD to YYYY-MM-DD for comparisons
+function toISO(dateStr) {
+  if (!dateStr) return '';
+  return dateStr.replace(/\//g, '-');
+}
+
 // ── DATE VALIDATION ──
 function validateDates() {
   const today = new Date().toISOString().split('T')[0];
-  const start = document.getElementById('trip-date').value;
-  const end = document.getElementById('trip-date-end').value;
+  const start = toISO(document.getElementById('trip-date').value);
+  const end = toISO(document.getElementById('trip-date-end').value);
   const errField = document.getElementById('date-error-field');
   const errMsg = document.getElementById('date-error-msg');
 
-  // Enforce today as minimum for start date
-  document.getElementById('trip-date').min = today;
-
-  if (start && start < today) {
+  if (start && start.length === 10 && start < today) {
     errField.style.display = 'block';
     errMsg.textContent = 'Start date cannot be in the past.';
     document.getElementById('trip-date').value = '';
     return false;
   }
-  if (start && end && end < start) {
+  if (start && end && end.length === 10 && end < start) {
     errField.style.display = 'block';
     errMsg.textContent = 'End date cannot be before the start date.';
     document.getElementById('trip-date-end').value = '';
@@ -1138,7 +1151,7 @@ function updateAirportFromVisibility() {
 
 // ── STEP 2 VALIDATION ──
 function validateStep2() {
-  const start = document.getElementById('trip-date').value;
+  const start = toISO(document.getElementById('trip-date').value);
   const pickup = document.getElementById('pickup').value.trim();
   const isAirport = state.coreService === 'airport';
   const isFullOrHalf = state.coreService === 'full_day' || state.coreService === 'half_day';
@@ -1164,14 +1177,14 @@ function validateStep2() {
   goStep(3);
 }
 function updateDays() {
-  const start = document.getElementById('trip-date').value;
-  const end = document.getElementById('trip-date-end').value;
-  if (start && end && end >= start) {
+  const start = toISO(document.getElementById('trip-date').value);
+  const end = toISO(document.getElementById('trip-date-end').value);
+  if (start && start.length === 10 && end && end.length === 10 && end >= start) {
     const diff = Math.round((new Date(end) - new Date(start)) / (1000 * 60 * 60 * 24)) + 1;
     state.tripDays = diff;
     document.getElementById('trip-days-display').value = diff + (diff === 1 ? ' day' : ' days');
     document.getElementById('days-display').style.display = 'flex';
-  } else if (start) {
+  } else if (start && start.length === 10) {
     state.tripDays = 1;
     document.getElementById('days-display').style.display = 'none';
   }
@@ -1358,7 +1371,9 @@ function updateSummary() {
   const startDate = document.getElementById('trip-date')?.value;
   const endDate = document.getElementById('trip-date-end')?.value;
   if (startDate) {
-    const dateStr = endDate && endDate !== startDate ? `${startDate} → ${endDate}` : startDate;
+    const dateStr = endDate && endDate !== startDate
+      ? formatDate(startDate) + ' → ' + formatDate(endDate)
+      : formatDate(startDate);
     html += `<div class="summary-row"><span class="label" style="color:var(--wm)">📅 ${dateStr}</span></div>`;
   }
 
@@ -1403,7 +1418,7 @@ async function submitBooking() {
   const email = document.getElementById('cust-email').value.trim();
   const dob = document.getElementById('cust-dob').value;
   const pickup = document.getElementById('pickup').value.trim();
-  const date = document.getElementById('trip-date').value;
+  const date = toISO(document.getElementById('trip-date').value);
 
   if (!name || !phone || !email || !dob || !pickup || !date) {
     showToast('Please fill in all required fields.', true); return;
@@ -1444,7 +1459,7 @@ async function submitBooking() {
     ? document.getElementById('halfday-start-time').value
     : document.getElementById('trip-time').value;
 
-  const endDate = document.getElementById('trip-date-end').value;
+  const endDate = toISO(document.getElementById('trip-date-end').value);
   const discountCode = document.getElementById('discount-code').value.trim().toUpperCase() || (activeDiscount ? activeDiscount.code : '');
 
   const booking = {
@@ -1498,7 +1513,9 @@ async function submitBooking() {
     ? `${date} → ${endDate} (${state.tripDays} days)`
     : date;
 
-  const dateDisplay = (endDate && endDate !== date) ? `${date} → ${endDate}` : date;
+  const dateDisplay = (endDate && endDate !== date)
+    ? formatDate(date) + ' → ' + formatDate(endDate)
+    : formatDate(date);
   const rows = [
     ['Name', name],
     ['Phone', phone],
@@ -1676,7 +1693,7 @@ function renderTable(bookings, filter) {
   tbody.innerHTML = [...filtered].reverse().map(b => [
     '<tr>',
     '<td style="color:var(--gold);font-weight:500">' + b.ref + '</td>',
-    '<td>' + b.date + '</td>',
+    '<td>' + formatDate(b.date) + '</td>',
     '<td>' + b.name + '</td>',
     '<td>' + b.phone + '</td>',
     '<td><span class="badge ' + vBadge(b.vehicle) + '">' + b.vehicle.split('(')[0].trim() + '</span></td>',
