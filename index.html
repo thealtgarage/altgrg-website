@@ -171,6 +171,12 @@ input[type=checkbox]:checked::after{
 .success-page p{color:var(--wm);font-size:0.9rem;max-width:480px;margin-bottom:1rem}
 .booking-ref{background:var(--dark2);border:1px solid var(--wf);padding:0.7rem 1.5rem;font-size:0.8rem;color:var(--gold);letter-spacing:0.15em;margin-bottom:1rem}
 
+/* Airport quick-fill chips */
+.airport-chip{background:var(--dark2);border:1px solid rgba(212,168,37,0.3);color:var(--white);padding:0.5rem 0.85rem;font-size:0.75rem;cursor:pointer;transition:all 0.2s;font-family:var(--font-b);text-align:left}
+.airport-chip:hover{background:rgba(212,168,37,0.12);border-color:var(--gold);color:var(--gold)}
+.airport-chip strong{color:var(--gold);display:block;margin-bottom:0.15rem}
+.airport-chip small{color:var(--wm);font-size:0.65rem}
+
 /* Booking confirmation summary */
 .confirm-summary{background:var(--dark2);border:1px solid var(--wf);padding:1.5rem;margin:1rem 0 1.5rem;text-align:left;width:100%;max-width:480px}
 .confirm-summary-title{font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:1rem;padding-bottom:0.6rem;border-bottom:1px solid var(--wf)}
@@ -452,17 +458,10 @@ tbody td{padding:0.75rem 1rem;color:var(--white);white-space:nowrap}
           <div class="service-item" data-service="night_shift" data-type="core" onclick="selectCore(this)">
             <div class="service-item-left">
               <div class="service-check"></div>
-              <div class="service-info"><h4>The Night Shift</h4><p>Starts 10pm · 4hr min, 8hr max · per hour</p></div>
+              <div class="service-info"><h4>The Night Shift</h4><p>Starts 10pm – 2am · 4hr min, 8hr max · per hour</p></div>
             </div>
             <div class="service-price" id="price-night_shift">—</div>
           </div>
-        </div>
-
-        <!-- Night Shift hour selector -->
-        <div class="hour-input" id="hours-night_shift" style="padding:0 1.1rem 0.8rem">
-          <label>Hours (4–8):</label>
-          <input type="number" min="4" max="8" value="4" id="val-night_shift" oninput="updateNightShiftHours()" />
-          <span style="font-size:0.72rem;color:var(--wm)">hr(s)</span>
         </div>
 
         <p style="font-size:0.75rem;color:var(--wm);margin-bottom:1rem;margin-top:1.8rem;letter-spacing:0.05em">Add-ons <span style="color:rgba(245,243,238,0.35)">(optional)</span></p>
@@ -539,6 +538,34 @@ tbody td{padding:0.75rem 1rem;color:var(--white);white-space:nowrap}
               <option value="16:00">4:00 PM → ends 10:00 PM</option>
             </select>
           </div>
+          <!-- Night Shift start time picker -->
+          <div class="field" id="nightshift-time-field" style="display:none">
+            <label>Start Time * <span style="color:rgba(245,243,238,0.35)">(10pm – 2am)</span></label>
+            <select id="nightshift-start-time" oninput="updateNightShiftEnd()">
+              <option value="22:00">10:00 PM</option>
+              <option value="23:00">11:00 PM</option>
+              <option value="00:00">12:00 AM (midnight)</option>
+              <option value="01:00">1:00 AM</option>
+              <option value="02:00">2:00 AM</option>
+            </select>
+          </div>
+          <!-- Night Shift duration picker -->
+          <div class="field" id="nightshift-duration-field" style="display:none">
+            <label>Duration *</label>
+            <select id="nightshift-duration" oninput="updateNightShiftEnd()">
+              <option value="4">4 hours</option>
+              <option value="5">5 hours</option>
+              <option value="6">6 hours</option>
+              <option value="7">7 hours</option>
+              <option value="8">8 hours</option>
+            </select>
+          </div>
+          <!-- Night Shift end time (auto) -->
+          <div class="field full" id="nightshift-end-field" style="display:none">
+            <p style="color:var(--gold);font-size:0.85rem;background:rgba(212,168,37,0.08);border:1px solid rgba(212,168,37,0.2);padding:0.6rem 0.9rem;margin:0">
+              ⏰ <strong>Ends: <span id="nightshift-end-display">—</span></strong>
+            </p>
+          </div>
           <!-- Generic pickup time -->
           <div class="field" id="generic-time-field">
             <label>Pickup Time *</label>
@@ -548,9 +575,23 @@ tbody td{padding:0.75rem 1rem;color:var(--white);white-space:nowrap}
             <label>Duration</label>
             <input type="text" id="trip-days-display" readonly style="background:var(--dark3);color:var(--gold);font-weight:500"/>
           </div>
+          <!-- Airport direction selector (shown only for Airport service) -->
+          <div class="field full" id="airport-direction-field" style="display:none">
+            <label>Service Direction *</label>
+            <select id="airport-direction" onchange="updateAirportDirection()">
+              <option value="">Select...</option>
+              <option value="pickup">Pickup from airport</option>
+              <option value="dropoff">Drop-off at airport</option>
+            </select>
+          </div>
+          <!-- Airport quick-fill chips -->
+          <div class="field full" id="airport-chips-field" style="display:none">
+            <label style="color:var(--gold);font-size:0.78rem">🛫 Quick fill — tap an airport:</label>
+            <div id="airport-chips" style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:0.4rem"></div>
+          </div>
           <!-- Airport from question (shown for Full Day and Half Day) -->
           <div class="field full" id="airport-from-field" style="display:none">
-            <label>Will you be travelling from the airport? *</label>
+            <label>Will you be travelling from an airport? *</label>
             <select id="airport-from" onchange="toggleFlightNumber()">
               <option value="">Select...</option>
               <option value="yes">Yes — arriving from an airport</option>
@@ -562,12 +603,12 @@ tbody td{padding:0.75rem 1rem;color:var(--white);white-space:nowrap}
             <label id="flight-num-label">Flight Number *</label>
             <input type="text" id="flight-num" placeholder="e.g. WT 204"/>
           </div>
-          <div class="field full">
-            <label>Pickup Location *</label>
+          <div class="field full" id="pickup-field">
+            <label id="pickup-label">Pickup Location *</label>
             <input type="text" id="pickup" placeholder="Street address or landmark" required/>
           </div>
-          <div class="field full">
-            <label>Drop-off Location</label>
+          <div class="field full" id="dropoff-field">
+            <label id="dropoff-label">Drop-off Location</label>
             <input type="text" id="dropoff" placeholder="Destination (if applicable)"/>
           </div>
           <div class="field full">
@@ -975,16 +1016,16 @@ function doGet(e) {
 // ── PRICING DATA ──
 const PRICES = {
   economy: {
-    half_day:49500, full_day:94000, airport:47500, interstate:null,
-    special_events:49500, extension:17500, night_shift:19500
+    half_day:49500, full_day:94000, airport:69500, interstate:null,
+    extension:17500, night_shift:19500
   },
   premium: {
-    half_day:84500, full_day:174000, airport:79500, interstate:247000,
-    special_events:149500, extension:20000, night_shift:29500
+    half_day:84500, full_day:174000, airport:99500, interstate:247000,
+    extension:20000, night_shift:29500
   },
   luxury: {
-    half_day:109500, full_day:294000, airport:109500, interstate:394000,
-    special_events:309500, extension:34500, night_shift:49500
+    half_day:109500, full_day:294000, airport:124500, interstate:394000,
+    extension:34500, night_shift:49500
   }
 };
 
@@ -1004,7 +1045,7 @@ const VEHICLE_LABELS = {
 // ── DISCOUNT TIERS ──
 const DISCOUNTS = {
   referral: { label: 'Referral Discount', pct: 0.08, code: 'ALTREF08' },
-  faf:      { label: 'Friends & Family Discount', pct: 0.15, code: 'ALTFAF15' }
+  faf:      { label: '#LOVEINA&E 🩷 — Special Wedding Discount', pct: 0.15, code: 'LOVEINAE' }
 };
 
 // Detect discount from URL e.g. ?discount=referral
@@ -1153,25 +1194,126 @@ function toggleFlightNumber() {
   flightField.style.display = val === 'yes' ? 'flex' : 'none';
 }
 
-// ── SHOW/HIDE AIRPORT FROM QUESTION ──
+// ── LAGOS AIRPORTS ──
+const LAGOS_AIRPORTS = [
+  { name: 'Murtala Muhammed International Airport (MMIA)', area: 'Ikeja, Lagos · International flights' },
+  { name: 'Murtala Muhammed Domestic Airport (MMA2)', area: 'Ikeja, Lagos · Domestic flights (private terminal)' },
+  { name: 'Lagos Domestic Terminal (GAT)', area: 'Ikeja, Lagos · Domestic flights' }
+];
+
+// Render airport chips that fill the active location field
+function renderAirportChips(targetFieldId) {
+  const container = document.getElementById('airport-chips');
+  container.innerHTML = '';
+  LAGOS_AIRPORTS.forEach(a => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'airport-chip';
+    btn.innerHTML = '<strong>' + a.name + '</strong><small>' + a.area + '</small>';
+    btn.onclick = () => {
+      document.getElementById(targetFieldId).value = a.name;
+      updateSummary();
+    };
+    container.appendChild(btn);
+  });
+}
+
+// ── AIRPORT DIRECTION HANDLER ──
+function updateAirportDirection() {
+  const dir = document.getElementById('airport-direction').value;
+  const pickupLabel = document.getElementById('pickup-label');
+  const dropoffLabel = document.getElementById('dropoff-label');
+  const dropoffField = document.getElementById('dropoff-field');
+  const pickupField = document.getElementById('pickup-field');
+  const chipsField = document.getElementById('airport-chips-field');
+
+  if (dir === 'pickup') {
+    // Picking up FROM airport → Pickup is the airport, Drop-off is destination
+    pickupLabel.innerHTML = 'Pickup Location * <span style="color:var(--gold);font-size:0.7rem">(airport)</span>';
+    dropoffLabel.innerHTML = 'Drop-off Location *';
+    dropoffField.style.display = 'flex';
+    pickupField.style.display = 'flex';
+    chipsField.style.display = 'flex';
+    renderAirportChips('pickup');
+  } else if (dir === 'dropoff') {
+    // Dropping off AT airport → Pickup is origin, Drop-off is the airport
+    pickupLabel.innerHTML = 'Pickup Location *';
+    dropoffLabel.innerHTML = 'Drop-off Location * <span style="color:var(--gold);font-size:0.7rem">(airport)</span>';
+    dropoffField.style.display = 'flex';
+    pickupField.style.display = 'flex';
+    chipsField.style.display = 'flex';
+    renderAirportChips('dropoff');
+  } else {
+    chipsField.style.display = 'none';
+  }
+}
+
+// ── NIGHT SHIFT END TIME CALCULATOR ──
+function updateNightShiftEnd() {
+  const startTime = document.getElementById('nightshift-start-time').value;
+  const duration = parseInt(document.getElementById('nightshift-duration').value);
+  if (!startTime || !duration) return;
+  const [h] = startTime.split(':').map(Number);
+  let endH = (h + duration) % 24;
+  const fmt = hr => {
+    if (hr === 0) return '12:00 AM (midnight)';
+    if (hr === 12) return '12:00 PM';
+    if (hr < 12) return hr + ':00 AM';
+    return (hr - 12) + ':00 PM';
+  };
+  document.getElementById('nightshift-end-display').textContent = fmt(endH);
+  state.addonHours['night_shift'] = duration;
+  updateSummary();
+}
+
+// ── SHOW/HIDE FIELDS BASED ON SERVICE ──
 function updateAirportFromVisibility() {
   const airportField = document.getElementById('airport-from-field');
   const flightField = document.getElementById('flight-num-field');
   const isAirport = state.coreService === 'airport';
   const isFullOrHalf = state.coreService === 'full_day' || state.coreService === 'half_day';
+  const isNightShift = state.coreService === 'night_shift';
+
+  // Reset all dynamic fields
+  document.getElementById('airport-direction-field').style.display = 'none';
+  document.getElementById('airport-chips-field').style.display = 'none';
+  document.getElementById('nightshift-time-field').style.display = 'none';
+  document.getElementById('nightshift-duration-field').style.display = 'none';
+  document.getElementById('nightshift-end-field').style.display = 'none';
+
+  // Reset location field labels
+  document.getElementById('pickup-label').textContent = 'Pickup Location *';
+  document.getElementById('dropoff-label').textContent = 'Drop-off Location';
 
   if (isAirport) {
-    // Airport — flight number mandatory, no question needed
+    // Airport — show direction selector + flight number, force single day
     airportField.style.display = 'none';
     flightField.style.display = 'flex';
     document.getElementById('flight-num-label').textContent = 'Flight Number *';
+    document.getElementById('airport-direction-field').style.display = 'flex';
+    // Force single day for airport
+    document.getElementById('is-single-day').checked = true;
+    toggleSingleDay();
+    updateAirportDirection();
   } else if (isFullOrHalf) {
-    // Full/Half Day — show the question
+    // Full/Half Day — show airport question
     airportField.style.display = 'flex';
     const val = document.getElementById('airport-from').value;
     flightField.style.display = val === 'yes' ? 'flex' : 'none';
+  } else if (isNightShift) {
+    // Night Shift — show start time + duration, force single day
+    document.getElementById('nightshift-time-field').style.display = 'flex';
+    document.getElementById('nightshift-duration-field').style.display = 'flex';
+    document.getElementById('nightshift-end-field').style.display = 'flex';
+    document.getElementById('is-single-day').checked = true;
+    toggleSingleDay();
+    updateNightShiftEnd();
+    airportField.style.display = 'none';
+    flightField.style.display = 'none';
+    document.getElementById('airport-from').value = '';
+    document.getElementById('flight-num').value = '';
   } else {
-    // All other services — hide both
+    // All other services — hide airport fields
     airportField.style.display = 'none';
     flightField.style.display = 'none';
     document.getElementById('airport-from').value = '';
@@ -1183,25 +1325,32 @@ function updateAirportFromVisibility() {
 function validateStep2() {
   const start = document.getElementById('trip-date').value;
   const pickup = document.getElementById('pickup').value.trim();
+  const dropoff = document.getElementById('dropoff').value.trim();
   const isAirport = state.coreService === 'airport';
   const isFullOrHalf = state.coreService === 'full_day' || state.coreService === 'half_day';
   const airportFrom = document.getElementById('airport-from').value;
   const flightNum = document.getElementById('flight-num').value.trim();
 
   if (!start) { showToast('Please select a start date.', true); return; }
-  if (!pickup) { showToast('Please enter a pickup location.', true); return; }
 
-  // Flight number mandatory for airport
-  if (isAirport && !flightNum) {
-    showToast('Please enter your flight number for airport pickup/drop-off.', true); return;
+  // Airport: validate direction + both locations
+  if (isAirport) {
+    const direction = document.getElementById('airport-direction').value;
+    if (!direction) { showToast('Please select pickup or drop-off direction.', true); return; }
+    if (!pickup) { showToast('Please enter the pickup location.', true); return; }
+    if (!dropoff) { showToast('Please enter the drop-off location.', true); return; }
+    if (!flightNum) { showToast('Please enter your flight number.', true); return; }
+  } else {
+    if (!pickup) { showToast('Please enter a pickup location.', true); return; }
   }
+
   // Flight number mandatory if arriving from airport on full/half day
   if (isFullOrHalf && airportFrom === 'yes' && !flightNum) {
     showToast('Please enter your flight number.', true); return;
   }
   // Must answer airport question for full/half day
   if (isFullOrHalf && !airportFrom) {
-    showToast('Please indicate whether you are travelling from the airport.', true); return;
+    showToast('Please indicate whether you are travelling from an airport.', true); return;
   }
 
   goStep(3);
@@ -1228,16 +1377,30 @@ function selectCore(el) {
   el.classList.add('selected','core-selected');
   state.coreService = el.dataset.service;
 
+  // Disable Economy for Airport service
+  const economyCard = document.querySelector('[data-vehicle="economy"]');
+  if (state.coreService === 'airport') {
+    economyCard.classList.add('disabled');
+    economyCard.querySelector('.vehicle-eg').textContent = 'Currently unavailable';
+    if (state.vehicle === 'economy') {
+      state.vehicle = null;
+      economyCard.classList.remove('selected');
+      updateSummary();
+    }
+  } else {
+    economyCard.classList.remove('disabled');
+    economyCard.querySelector('.vehicle-eg').textContent = 'Comfortable & reliable';
+  }
+
   // Show/hide full day / half day start time pickers
   const isFullDay = state.coreService === 'full_day';
   const isHalfDay = state.coreService === 'half_day';
+  const isNightShift = state.coreService === 'night_shift';
   document.getElementById('fullday-time-field').style.display = isFullDay ? 'flex' : 'none';
   document.getElementById('halfday-time-field').style.display = isHalfDay ? 'flex' : 'none';
-  document.getElementById('generic-time-field').style.display = (isFullDay || isHalfDay) ? 'none' : 'flex';
-
-  // Show/hide night shift hour selector
-  const nightHours = document.getElementById('hours-night_shift');
-  nightHours.classList.toggle('show', state.coreService === 'night_shift');
+  // Generic time picker only for services other than full/half/night/airport
+  const useGenericTime = !isFullDay && !isHalfDay && !isNightShift && state.coreService !== 'airport';
+  document.getElementById('generic-time-field').style.display = useGenericTime ? 'flex' : 'none';
 
   updateAirportFromVisibility();
   updateSummary();
@@ -1364,7 +1527,16 @@ function updateSummary() {
     html += `<div class="summary-row"><span class="label">${SERVICE_LABELS[state.coreService]}</span><span class="val">₦${subtotal.toLocaleString()}</span></div>`;
     if (multiplier > 1) {
       if (state.coreService === 'night_shift') {
-        html += `<div class="summary-row addon"><span class="label">${multiplier}hrs from 10pm · ends ${getEndTime('22:00', multiplier)}</span><span class="val"></span></div>`;
+        const nsStart = document.getElementById('nightshift-start-time')?.value || '22:00';
+        const [h] = nsStart.split(':').map(Number);
+        let endH = (h + multiplier) % 24;
+        const fmt = hr => {
+          if (hr === 0) return '12:00 AM';
+          if (hr === 12) return '12:00 PM';
+          return hr < 12 ? hr + ':00 AM' : (hr - 12) + ':00 PM';
+        };
+        const startFmt = fmt(h);
+        html += `<div class="summary-row addon"><span class="label">${multiplier}hrs · ${startFmt} → ${fmt(endH)}</span><span class="val"></span></div>`;
       } else {
         html += `<div class="summary-row addon"><span class="label">${multiplier} days × ₦${price.toLocaleString()}</span><span class="val"></span></div>`;
       }
@@ -1511,10 +1683,13 @@ async function submitBooking() {
   // Get pickup time based on service
   const isFullDay = state.coreService === 'full_day';
   const isHalfDay = state.coreService === 'half_day';
+  const isNightShift = state.coreService === 'night_shift';
   const pickupTime = isFullDay
     ? document.getElementById('fullday-start-time').value
     : isHalfDay
     ? document.getElementById('halfday-start-time').value
+    : isNightShift
+    ? document.getElementById('nightshift-start-time').value
     : document.getElementById('trip-time').value;
 
   const endDate = document.getElementById('trip-date-end').value;
@@ -1639,6 +1814,14 @@ function resetBooking() {
   document.getElementById('end-date-field').style.pointerEvents = 'auto';
   document.getElementById('airport-from-field').style.display = 'none';
   document.getElementById('airport-from').value = '';
+  document.getElementById('airport-direction-field').style.display = 'none';
+  document.getElementById('airport-direction').value = '';
+  document.getElementById('airport-chips-field').style.display = 'none';
+  document.getElementById('nightshift-time-field').style.display = 'none';
+  document.getElementById('nightshift-duration-field').style.display = 'none';
+  document.getElementById('nightshift-end-field').style.display = 'none';
+  document.getElementById('pickup-label').textContent = 'Pickup Location *';
+  document.getElementById('dropoff-label').textContent = 'Drop-off Location';
   document.getElementById('flight-num-field').style.display = 'none';
   document.getElementById('date-error-field').style.display = 'none';
   const otherInput = document.getElementById('referral-other');
